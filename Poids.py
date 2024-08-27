@@ -1,6 +1,3 @@
-# cd C:\Users\rivoi\Documents\NetBeansProjects\PycharmProjects\PoidsPression
-# pyinstaller --onefile Poids.py --icon=C:\Users\rivoi\Documents\NetBeansProjects\PycharmProjects\PoidsPression\weight-scale.ico --nowindowed --noconsole
-
 # Takeout
 # https://takeout.google.com/
 

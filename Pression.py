@@ -1,6 +1,3 @@
-# cd C:\Users\rivoi\Documents\NetBeansProjects\PycharmProjects\PoidsPression
-# pyinstaller --onefile Pression3.py --icon=C:\Users\rivoi\Documents\NetBeansProjects\PycharmProjects\PoidsPression\pression.ico --nowindowed --noconsole
-
 import logging as log
 import logging.handlers
 import logging.handlers
