@@ -167,9 +167,9 @@ class Dialog:
 
 if __name__ == "__main__":
 	try:
-		start_time: float = time.time()
 		pression: Pression = Pression()
 
+		start_time: float = time.time()
 		pressure_list: list[dict]
 		log.info(f'sys.argv: {sys.argv}')
 
