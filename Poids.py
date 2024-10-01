@@ -18,6 +18,7 @@ CLOUD_PATH = DL_PATH + "Takeout/Fit/All Data/"
 JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
 CSV_FILE = "Renpho Health R_PmJP0.csv"
 ZIP_FILE = "takeout-*.zip"
+WINDOW = 180
 
 log.basicConfig(
 	level=logging.INFO,
@@ -54,17 +55,22 @@ def add_data(file_name):
 
 
 def show():
-	plt.plot(df["date"], df["kg"], color="g", label='Kg')
-	mean = df["kg"].rolling(window=180).mean()
-	plt.plot(df["date"], mean, color='0.5', label='Running average')
-	plt.legend(loc='best')
+	plt.plot(df["date"], df["kg"], color="g")
+
+	mean = df["kg"].rolling(window=WINDOW).mean()
+	plt.plot(df["date"], mean, color='0.5')
+
+	# median = df["kg"].rolling(window=180).skew()
+	# plt.plot(df["date"], median, color='red', label='Running median')
+
+	# plt.legend(loc='best')
 	plt.tight_layout()
 	plt.grid(which="both")
 	plt.grid(which="major", linewidth=1)
 	plt.grid(which="minor", linewidth=0.2)
 	max_kg = df['kg'].max(numeric_only=True)
 	min_kg = df['kg'].min(numeric_only=True)
-	plt.title(f"Poids, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg")
+	plt.title(f"Poids: {df['kg'][len(df['kg'])-1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (x̄: {WINDOW} days)")
 	max_kg = int(max_kg) + 1
 	min_kg = int(min_kg) - 1
 	x_min = df['date'][0] - timedelta(days=10)

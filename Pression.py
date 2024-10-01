@@ -14,6 +14,7 @@ import pandas as pd
 
 VERSION = 3
 PATH = "G:/My Drive/PoidsPression/"
+WINDOW = 60
 
 log.basicConfig(
 	level=logging.INFO,
@@ -47,9 +48,16 @@ class Pression:
 	def display(self, pressure_list: list[dict[str, datetime]]) -> None:
 		df: pd.DataFrame = pd.DataFrame(pressure_list)
 
-		plt.plot(df["date"], df["sys"], "g", label='Sys')
-		plt.plot(df["date"], df["dia"], "b", label='Dia')
-		plt.plot(df["date"], df["pulse"], "r", label='Pulse')
+		mean = df["sys"].rolling(window=WINDOW).mean()
+		plt.plot(df["date"], mean, color='darkgreen')
+		mean = df["dia"].rolling(window=WINDOW).mean()
+		plt.plot(df["date"], mean, color='darkblue')
+		# mean = df["pulse"].rolling(window=WINDOW).mean()
+		# plt.plot(df["date"], mean, color='darkred')
+
+		plt.plot(df["date"], df["sys"], "g", label=f'Sys')
+		plt.plot(df["date"], df["dia"], "b", label=f'Dia')
+		# plt.plot(df["date"], df["pulse"], "r", label=f'Pulse')
 
 		max_sys: int = int(df['sys'].max(numeric_only=True)) + 1
 		min_sys: int = int(df['sys'].min(numeric_only=True)) - 1
@@ -57,15 +65,15 @@ class Pression:
 		max_dia: int = int(df['dia'].max(numeric_only=True)) + 1
 		min_dia: int = int(df['dia'].min(numeric_only=True)) - 1
 		log.info(f"max_dia: {max_dia}, min_dia: {min_dia}")
-		max_pulse: int = int(df['pulse'].max(numeric_only=True)) + 1
-		min_pulse: int = int(df['pulse'].min(numeric_only=True)) - 1
-		log.info(f"max_pulse: {max_pulse}, min_pulse: {min_pulse}")
+		# max_pulse: int = int(df['pulse'].max(numeric_only=True)) + 1
+		# min_pulse: int = int(df['pulse'].min(numeric_only=True)) - 1
+		# log.info(f"max_pulse: {max_pulse}, min_pulse: {min_pulse}")
 
 		maximum: int = max_sys if max_sys > max_dia else max_dia
-		maximum = (maximum if maximum > max_pulse else max_pulse) + 1
+		# maximum = (maximum if maximum > max_pulse else max_pulse) + 1
 
 		minimum: int = min_sys if min_sys < min_dia else min_dia
-		minimum = int(round(((minimum if minimum < min_pulse else min_pulse) - 1) / 10, 0) * 10)
+		# minimum = int(round(((minimum if minimum < min_pulse else min_pulse) - 1) / 10, 0) * 10)
 
 		plt.axis((df["date"][0], df["date"][df["date"].size - 1], minimum, maximum))
 
@@ -102,7 +110,7 @@ class Pression:
 		fig.canvas.manager.set_window_title(f'Pression {VERSION}')
 		DPI: float = fig.get_dpi()
 		fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
-		plt.title(f'Pression {VERSION}')
+		plt.title(f'Pression {VERSION} (x̄: {WINDOW} days)')
 		plt.savefig(PATH + 'pression.png')
 		plt.show()
 
@@ -132,7 +140,8 @@ class Dialog:
 		entries[0][1].focus()
 		Dialog.ROOT.mainloop()
 
-	def validate(self, character: Any, entry_value: str) -> object:
+	@staticmethod
+	def validate(character: Any, entry_value: str) -> object:
 		return True if (character in '0123456789 ' and len(entry_value) < 4) else False
 
 	def make_form(self) -> list[tuple[Any, Entry, IntVar]]:
