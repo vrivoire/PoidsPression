@@ -5,7 +5,7 @@ import sys
 import time
 import tkinter as tk
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from tkinter import Entry, IntVar, Tk
 from typing import Any
 
@@ -127,16 +127,16 @@ class Dialog:
 		Dialog.ROOT.eval('tk::PlaceWindow . center')
 		Dialog.ROOT.title(f"Pression {VERSION}")
 		Dialog.ROOT.resizable(False, False)
-		
+
 		row = tk.Frame(Dialog.ROOT)
 		tk.Label(row, width=20, text=f"Pression v{VERSION}", anchor='center', font=('calibre', 12, 'bold')).pack(side=tk.LEFT)
 		row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-		
+
 		entries: list[tuple[Any, Entry, IntVar]] = self.make_form()
-		
+
 		Dialog.ROOT.bind('<Return>', lambda event: self.submit(entries))
 		tk.Button(text='Show', width=20, command=lambda: self.submit(entries)).pack(padx=5, pady=5)
-		
+
 		entries[0][1].focus()
 		Dialog.ROOT.mainloop()
 
@@ -165,12 +165,14 @@ class Dialog:
 			try:
 				value = entry[2].get()
 				line[field.lower()] = value
-			except tk.TclError as ex:
+			except tk.TclError as ex1:
 				error = True
-				log.error(f'{field}: {ex}')
+				log.error(f'{field}: {ex1}')
 		if not error:
 			line['date'] = datetime.now()
 			pression.add_line(line)
+			Dialog.ROOT.destroy()
+		elif entries[0][1].get() == '' and entries[1][1].get() == '' and entries[2][1].get() == '':
 			Dialog.ROOT.destroy()
 
 
@@ -189,7 +191,7 @@ if __name__ == "__main__":
 		pression.save_csv(pressure_list)
 		pression.display(pressure_list)
 		log.info("--- %s seconds ---" % (time.time() - start_time))
-		# c = 5/ 0
+	# c = 5/ 0
 	except Exception as ex:
 		log.error(ex)
 		log.error(traceback.format_exc())

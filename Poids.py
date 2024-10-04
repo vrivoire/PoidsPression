@@ -7,9 +7,10 @@ import logging as log
 import logging.handlers
 import os.path
 import shutil
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import pandas as pd
 
 PATH = "G:/My Drive/PoidsPression/"
@@ -60,6 +61,8 @@ def show():
 	mean = df["kg"].rolling(window=WINDOW).mean()
 	plt.plot(df["date"], mean, color='0.5')
 
+	plt.axvline(datetime(2023, 2, 2))
+
 	# median = df["kg"].rolling(window=180).skew()
 	# plt.plot(df["date"], median, color='red', label='Running median')
 
@@ -70,7 +73,7 @@ def show():
 	plt.grid(which="minor", linewidth=0.2)
 	max_kg = df['kg'].max(numeric_only=True)
 	min_kg = df['kg'].min(numeric_only=True)
-	plt.title(f"Poids: {df['kg'][len(df['kg'])-1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (x̄: {WINDOW} days)")
+	plt.title(f"Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (x̄: {WINDOW} days)")
 	max_kg = int(max_kg) + 1
 	min_kg = int(min_kg) - 1
 	x_min = df['date'][0] - timedelta(days=10)
@@ -83,11 +86,18 @@ def show():
 		count += 1
 	plt.yticks(yticks)
 	plt.minorticks_on()
+
+	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+	# plt.gcf().autofmt_xdate(fontsize='small')  # Rotate and align the tick labels
+	plt.xticks(rotation=45, ha='right', fontsize='small')
+	plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+
 	fig = plt.gcf()
 	fig.canvas.manager.set_window_title('Poids')
 	DPI = fig.get_dpi()
 	fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
 	plt.savefig(PATH + 'Poids.png')
+
 	plt.show()
 
 
