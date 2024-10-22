@@ -110,7 +110,8 @@ class Pression:
 		fig.canvas.manager.set_window_title(f'Pression {VERSION}')
 		DPI: float = fig.get_dpi()
 		fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
-		plt.title(f'Pression {VERSION} (x̄: {WINDOW} days)')
+		print()
+		plt.title(f'Pression {VERSION} (x̄: {WINDOW} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
 		plt.savefig(PATH + 'pression.png')
 		plt.show()
 
