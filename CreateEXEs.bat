@@ -7,7 +7,4 @@ pyinstaller --onefile Poids.py --icon=weight-scale.ico --nowindowed --noconsole
 pyinstaller --onefile Pression.py --icon=pression.ico --nowindowed --noconsole
 @echo -------------------------------------------------
 
-cd C:\Users\rivoi\Documents\NetBeansProjects\PycharmProjects\Thermopro
-pyinstaller --onefile Thermopro.py --icon=Thermopro.jpg --nowindowed --noconsole
-
 pause
