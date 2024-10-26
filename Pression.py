@@ -1,6 +1,5 @@
 import logging as log
 import logging.handlers
-import logging.handlers
 import sys
 import time
 import tkinter as tk
