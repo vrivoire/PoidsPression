@@ -17,7 +17,7 @@ WINDOW = 60
 
 log.basicConfig(
 	level=logging.INFO,
-	format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+	format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] [%(lineno)d] %(message)s",
 	handlers=[
 		logging.handlers.TimedRotatingFileHandler(f'{PATH}Pression.log', when='midnight', interval=1, backupCount=7, encoding=None, delay=False, utc=False, atTime=None, errors=None),
 		logging.StreamHandler()
@@ -30,7 +30,8 @@ class Pression:
 	def __init__(self):
 		log.info('Starting')
 
-	def load_csv(self) -> list[dict]:
+	@staticmethod
+	def load_csv() -> list[dict]:
 		try:
 			df: pd.DataFrame = pd.read_csv(f'{PATH}pression.csv')
 			df['date'] = pd.to_datetime(df['date'])
@@ -40,11 +41,13 @@ class Pression:
 			pressure_list: list[dict[str, datetime]] = []
 			return pressure_list
 
-	def save_csv(self, pressure_list: list[dict[str, datetime]]) -> None:
+	@staticmethod
+	def save_csv(pressure_list: list[dict[str, datetime]]) -> None:
 		df: pd.DataFrame = pd.DataFrame(pressure_list)
 		df.to_csv(f'{PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
-	def display(self, pressure_list: list[dict[str, datetime]]) -> None:
+	@staticmethod
+	def display(pressure_list: list[dict[str, datetime]]) -> None:
 		df: pd.DataFrame = pd.DataFrame(pressure_list)
 
 		mean = df["sys"].rolling(window=WINDOW).mean()
@@ -156,7 +159,8 @@ class Dialog:
 			entries.append((field, ent, intVar))
 		return entries
 
-	def submit(self, entries: list[tuple[Any, Entry, IntVar]]) -> None:
+	@staticmethod
+	def submit(entries: list[tuple[Any, Entry, IntVar]]) -> None:
 		error: bool = False
 		line: dict = {}
 		for entry in entries:

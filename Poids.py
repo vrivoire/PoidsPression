@@ -23,7 +23,7 @@ WINDOW = 180
 
 log.basicConfig(
 	level=logging.INFO,
-	format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+	format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] [%(lineno)d] %(message)s",
 	handlers=[
 		logging.handlers.TimedRotatingFileHandler(PATH + "Poids.log", when='midnight', interval=1, backupCount=7, encoding=None, delay=False, utc=False, atTime=None, errors=None),
 		logging.StreamHandler()
