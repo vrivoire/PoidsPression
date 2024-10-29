@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, date
 from tkinter import Entry, IntVar, Tk
 from typing import Any
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -59,7 +60,6 @@ class Pression:
 
 		plt.plot(df["date"], df["sys"], "g", label=f'Sys')
 		plt.plot(df["date"], df["dia"], "b", label=f'Dia')
-		# plt.plot(df["date"], df["pulse"], "r", label=f'Pulse')
 
 		max_sys: int = int(df['sys'].max(numeric_only=True)) + 1
 		min_sys: int = int(df['sys'].min(numeric_only=True)) - 1
@@ -67,15 +67,9 @@ class Pression:
 		max_dia: int = int(df['dia'].max(numeric_only=True)) + 1
 		min_dia: int = int(df['dia'].min(numeric_only=True)) - 1
 		log.info(f"max_dia: {max_dia}, min_dia: {min_dia}")
-		# max_pulse: int = int(df['pulse'].max(numeric_only=True)) + 1
-		# min_pulse: int = int(df['pulse'].min(numeric_only=True)) - 1
-		# log.info(f"max_pulse: {max_pulse}, min_pulse: {min_pulse}")
 
 		maximum: int = max_sys if max_sys > max_dia else max_dia
-		# maximum = (maximum if maximum > max_pulse else max_pulse) + 1
-
 		minimum: int = min_sys if min_sys < min_dia else min_dia
-		# minimum = int(round(((minimum if minimum < min_pulse else min_pulse) - 1) / 10, 0) * 10)
 
 		plt.axis((df["date"][0], df["date"][df["date"].size - 1], minimum, maximum))
 
@@ -95,6 +89,11 @@ class Pression:
 		plt.axhspan(100, 110, color='xkcd:pastel orange', linestyle='-')
 		plt.axhspan(90, 100, color='xkcd:light orange', linestyle='-')
 		plt.axhspan(80, 90, color='xkcd:apricot', linestyle='-')
+
+		plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m'))
+		plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+		plt.gca().xaxis.set_minor_locator(mdates.DayLocator(interval=7))
+		plt.xticks(rotation=45, ha='right', fontsize='small')
 
 		plt.legend()
 		plt.tight_layout()

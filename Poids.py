@@ -63,10 +63,6 @@ def show():
 
 	plt.axvline(datetime(2023, 2, 2))
 
-	# median = df["kg"].rolling(window=180).skew()
-	# plt.plot(df["date"], median, color='red', label='Running median')
-
-	# plt.legend(loc='best')
 	plt.tight_layout()
 	plt.grid(which="both")
 	plt.grid(which="major", linewidth=1)
@@ -87,10 +83,9 @@ def show():
 	plt.yticks(yticks)
 	plt.minorticks_on()
 
-	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-	# plt.gcf().autofmt_xdate(fontsize='small')  # Rotate and align the tick labels
-	plt.xticks(rotation=45, ha='right', fontsize='small')
+	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m'))
 	plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+	plt.xticks(rotation=45, ha='right', fontsize='small')
 
 	fig = plt.gcf()
 	fig.canvas.manager.set_window_title('Poids')
