@@ -88,6 +88,14 @@ def show():
 	plt.xticks(rotation=45, ha='right', fontsize='small')
 
 	fig = plt.gcf()
+	fig.subplots_adjust(
+		left=0.055,
+		bottom=0.105,
+		right=0.952,
+		top=0.948,
+		wspace=0.198,
+		hspace=0.202
+	)
 	fig.canvas.manager.set_window_title('Poids')
 	DPI = fig.get_dpi()
 	fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
