@@ -14,7 +14,7 @@ import pandas as pd
 
 VERSION = 3
 PATH = "G:/My Drive/PoidsPression/"
-WINDOW = 60
+DAYS = 60
 
 log.basicConfig(
 	level=logging.INFO,
@@ -51,9 +51,9 @@ class Pression:
 	def display(pressure_list: list[dict[str, datetime]]) -> None:
 		df: pd.DataFrame = pd.DataFrame(pressure_list)
 
-		mean = df["sys"].rolling(window=WINDOW).mean()
+		mean = df.rolling(window=f'{DAYS}D', on='date')['sys'].mean()
 		plt.plot(df["date"], mean, color='darkgreen')
-		mean = df["dia"].rolling(window=WINDOW).mean()
+		mean = df.rolling(window=f'{DAYS}D', on='date')['dia'].mean()
 		plt.plot(df["date"], mean, color='darkblue')
 		# mean = df["pulse"].rolling(window=WINDOW).mean()
 		# plt.plot(df["date"], mean, color='darkred')
@@ -120,7 +120,7 @@ class Pression:
 		DPI: float = fig.get_dpi()
 		fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
 		print()
-		plt.title(f'Pression {VERSION} (x̄: {WINDOW} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
+		plt.title(f'Pression {VERSION} (x̄: {DAYS} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
 		plt.savefig(PATH + 'pression.png')
 		plt.show()
 
