@@ -2,9 +2,11 @@
 cls
 cd C:\Users\rivoi\Documents\NetBeansProjects\PycharmProjects\PoidsPression
 @echo -------------------------------------------------
-pyinstaller --onefile Poids.py --icon=weight-scale.ico --nowindowed --noconsole
+rem pyinstaller --onefile Poids.py --icon=weight-scale.ico --nowindowed --noconsole
+pyinstaller --onedir  Poids.py --icon=weight-scale.ico --nowindowed --noconsole
 @echo -------------------------------------------------
-pyinstaller --onefile Pression.py --icon=pression.ico --nowindowed --noconsole
+rem pyinstaller --onefile Pression.py --icon=pression.ico --nowindowed --noconsole
+pyinstaller --onedir  Pression.py --icon=pression.ico --nowindowed --noconsole
 @echo -------------------------------------------------
 
 pause
