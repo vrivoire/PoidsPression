@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.dates import date2num, num2date
+from matplotlib.widgets import Slider, Button
 import pandas as pd
 
 PATH = "G:/My Drive/PoidsPression/"
@@ -59,19 +61,21 @@ def add_data(file_name):
     result = pd.read_json(file_name)
     for dataPoint in result["Data Points"]:
         kg = float(dataPoint["fitValue"][0]["value"]["fpVal"])
-        date = pd.to_datetime(
+        ndate = pd.to_datetime(
             int(dataPoint["endTimeNanos"]) / 1000000, utc=False, unit="ms"
         )
-        if date.year >= 2021:
-            data.append({"kg": kg, "date": date})
+        if ndate.year >= 2021:
+            data.append({"kg": kg, "date": ndate})
     return data
 
 
 def display_graph():
-    plt.plot(df["date"], df["kg"], color="g")
+    fig, ax1 = plt.subplots()
+
+    ax1.plot(df["date"], df["kg"], color="g")
 
     mean = df.rolling(window=f'{DAYS}D', on='date')['kg'].mean()
-    plt.plot(df["date"], mean, color='0.5')
+    ax1.plot(df["date"], mean, color='0.5')
 
     plt.axvline(datetime(2023, 2, 2))
 
@@ -99,19 +103,35 @@ def display_graph():
     plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     plt.xticks(rotation=45, ha='right', fontsize='small')
 
-    fig = plt.gcf()
+    plt.gcf()
     fig.subplots_adjust(
         left=0.055,
-        bottom=0.105,
+        bottom=0.133,
         right=0.952,
         top=0.948,
         wspace=0.198,
-        hspace=0.202
+        hspace=0.102
     )
     fig.canvas.manager.set_window_title('Poids')
     DPI = fig.get_dpi()
     fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
     plt.savefig(PATH + 'Poids.png')
+
+    def update(val):
+        slider_position.valtext.set_text(num2date(val).date())
+        ax1.axis([val - 100, val + 100, min_kg, max_kg])
+        fig.canvas.draw_idle()
+
+    def reset(event):
+        slider_position.reset()
+        ax1.axis([date2num(df["date"][0]), date2num(df['date'][len(df['date']) - 1]), min_kg, max_kg])
+        fig.canvas.draw_idle()
+
+    slider_position = Slider(plt.axes((0.08, 0.01, 0.73, 0.03), facecolor='White'), 'Date', date2num(df["date"][0]), date2num(df['date'][len(df['date']) - 1]), valstep=1, color='w', initcolor='none')
+    slider_position.valtext.set_text(df["date"][0].date())
+    slider_position.on_changed(update)
+    button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
+    button.on_clicked(reset)
 
     plt.show()
 
