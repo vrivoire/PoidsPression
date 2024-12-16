@@ -119,7 +119,11 @@ def display_graph():
 
     def update(val):
         slider_position.valtext.set_text(num2date(val).date())
-        ax1.axis([val - 100, val + 100, min_kg, max_kg])
+        df2 = df.set_index(['date'])
+        df2 = df2.loc[num2date(val - 100).date():num2date(val + 100).date()]
+        max_kg2 = int(df2['kg'].max(numeric_only=True)) + 1
+        min_kg2 = int(df2['kg'].min(numeric_only=True)) - 1
+        ax1.axis([val - 100, val + 100, min_kg2, max_kg2])
         fig.canvas.draw_idle()
 
     def reset(event):
@@ -178,5 +182,6 @@ if __name__ == "__main__":
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
     df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
-    log.info('\n' + df.to_string())
+    log.info('\n')
+    log.info(df)
     display_graph()
