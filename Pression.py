@@ -62,7 +62,7 @@ class Pression:
         df.to_csv(f'{PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
 
     @staticmethod
-    def display(pressure_list: list[dict[str, datetime]]) -> None:
+    def display_graph(pressure_list: list[dict[str, datetime]]) -> None:
         df: pd.DataFrame = pd.DataFrame(pressure_list)
 
         mean = df.rolling(window=f'{DAYS}D', on='date')['sys'].mean()
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 
         log.info(f"\n{pd.DataFrame(pressure_list).to_string()}")
         pression.save_csv(pressure_list)
-        pression.display(pressure_list)
+        pression.display_graph(pressure_list)
         log.info("--- %s seconds ---" % (time.time() - start_time))
     # c = 5/ 0
     except Exception as ex:

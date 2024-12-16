@@ -67,7 +67,7 @@ def add_data(file_name):
     return data
 
 
-def show():
+def display_graph():
     plt.plot(df["date"], df["kg"], color="g")
 
     mean = df.rolling(window=f'{DAYS}D', on='date')['kg'].mean()
@@ -159,4 +159,4 @@ if __name__ == "__main__":
     df = pd.DataFrame(sortedDatas)
     df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
     log.info('\n' + df.to_string())
-    show()
+    display_graph()
