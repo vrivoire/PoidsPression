@@ -4,7 +4,7 @@ import sys
 import time
 import tkinter as tk
 import traceback
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from tkinter import Entry, IntVar, Tk
 from typing import Any
 import os
@@ -51,8 +51,8 @@ class Pression:
             df: pd.DataFrame = pd.read_csv(f'{PATH}pression.csv')
             df['date'] = pd.to_datetime(df['date'])
             return df.to_dict('records')
-        except (FileNotFoundError, pd.errors.EmptyDataError) as ex:
-            log.error(ex)
+        except (FileNotFoundError, pd.errors.EmptyDataError) as ex1:
+            log.error(ex1)
             pressure_list: list[dict[str, datetime]] = []
             return pressure_list
 
@@ -117,9 +117,10 @@ class Pression:
         plt.minorticks_on()
 
         ax: plt.axes.Axes = plt.gca()
-        x_min: datetime = pressure_list[0]['date'] - timedelta(days=10)
-        x_max: datetime = pressure_list[len(pressure_list) - 1]['date'] + timedelta(days=10)
-        ax.set_xlim(x_min, x_max)
+        ax.set_xlim(
+            pressure_list[0]['date'] - timedelta(days=10),
+            pressure_list[len(pressure_list) - 1]['date'] + timedelta(days=10)
+        )
 
         fig: plt.axes.Figure = plt.gcf()
         fig.subplots_adjust(
@@ -134,7 +135,7 @@ class Pression:
         DPI: float = fig.get_dpi()
         fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
         print()
-        plt.title(f'Pression {VERSION} (x̄: {DAYS} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
+        plt.title(f'Pression (x̄: {DAYS} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
         plt.savefig(PATH + 'pression.png')
         plt.show()
 

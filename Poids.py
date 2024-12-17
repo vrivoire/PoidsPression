@@ -88,9 +88,12 @@ def display_graph():
     plt.title(f"Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (rolling x̄: {DAYS} days)")
     max_kg = int(max_kg) + 1
     min_kg = int(min_kg) - 1
-    x_min = df['date'][0] - timedelta(days=10)
-    x_max = df["date"][df["date"].size - 1] + timedelta(days=10)
-    plt.axis((x_min, x_max, min_kg, max_kg))
+    plt.axis((
+        df['date'][0] - timedelta(days=10),
+        df["date"][df["date"].size - 1] + timedelta(days=10),
+        min_kg,
+        max_kg
+    ))
     yticks = []
     count = min_kg
     while count <= max_kg:
@@ -119,11 +122,8 @@ def display_graph():
 
     def update(val):
         slider_position.valtext.set_text(num2date(val).date())
-        df2 = df.set_index(['date'])
-        df2 = df2.loc[num2date(val - 50).date():num2date(val + 50).date()]
-        max_kg2 = df2['kg'].max(numeric_only=True) + 0.5
-        min_kg2 = df2['kg'].min(numeric_only=True) - 0.5
-        window = [val - 50, val + 50, min_kg2, max_kg2]
+        df2 = df.set_index(['date']).loc[num2date(val - 50).date():num2date(val + 50).date()]
+        window = [val - 50, val + 50, df2['kg'].min(numeric_only=True) - 0.5, df2['kg'].max(numeric_only=True) + 0.5]
         ax1.axis(window)
         fig.canvas.draw_idle()
 
@@ -133,7 +133,14 @@ def display_graph():
         ax1.axis(window)
         fig.canvas.draw_idle()
 
-    slider_position = Slider(plt.axes((0.08, 0.01, 0.73, 0.03), facecolor='White'), 'Date', date2num(df["date"][0]), date2num(df['date'][len(df['date']) - 1]), valstep=1, color='w', initcolor='none')
+    slider_position = Slider(
+        plt.axes((0.08, 0.01, 0.73, 0.03), facecolor='White'),
+        'Date', date2num(df["date"][0]),
+        date2num(df['date'][len(df['date']) - 1]),
+        valstep=1,
+        color='w',
+        initcolor='none'
+    )
     slider_position.valtext.set_text(df["date"][0].date())
     slider_position.on_changed(update)
     button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
