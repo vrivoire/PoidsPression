@@ -1,5 +1,6 @@
 import logging as log
 import logging.handlers
+import os
 import sys
 import time
 import tkinter as tk
@@ -7,8 +8,8 @@ import traceback
 from datetime import datetime, timedelta
 from tkinter import Entry, IntVar, Tk
 from typing import Any
-import os
 
+import dateutil.relativedelta
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -134,8 +135,12 @@ class Pression:
         fig.canvas.manager.set_window_title(f'Pression {VERSION}')
         DPI: float = fig.get_dpi()
         fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
-        print()
-        plt.title(f'Pression (x̄: {DAYS} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
+
+        last_month = datetime.now() - dateutil.relativedelta.relativedelta(days=DAYS)
+        mask = df['date'] > last_month
+        df2 = df.loc[mask]
+
+        plt.title(f'Pression (x̄: {DAYS} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]} (sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())})')
         plt.savefig(PATH + 'pression.png')
         plt.show()
 
