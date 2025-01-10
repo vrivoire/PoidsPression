@@ -16,7 +16,7 @@ import pandas as pd
 
 VERSION = 3
 PATH = "G:/My Drive/PoidsPression/"
-DAYS = 60
+DAYS = 30.437 * 2
 
 
 LOG_PATH = f"{PATH}logs/"
@@ -139,8 +139,9 @@ class Pression:
         last_month = datetime.now() - dateutil.relativedelta.relativedelta(days=DAYS)
         mask = df['date'] > last_month
         df2 = df.loc[mask]
+        log.info(f"x: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}")
 
-        plt.title(f'Pression (x̄: {DAYS} days), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]} (sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())})')
+        plt.title(f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
         plt.savefig(PATH + 'pression.png')
         plt.show()
 
