@@ -12,12 +12,12 @@ from typing import Any
 import dateutil.relativedelta
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+from matplotlib.widgets import CheckButtons
 import pandas as pd
 
 VERSION = 3
 PATH = "G:/My Drive/PoidsPression/"
 DAYS = 30.437 * 2
-
 
 LOG_PATH = f"{PATH}logs/"
 LOG_FILE = f'{LOG_PATH}Pression.log'
@@ -73,8 +73,9 @@ class Pression:
         # mean = df["pulse"].rolling(window=WINDOW).mean()
         # plt.plot(df["date"], mean, color='darkred')
 
-        plt.plot(df["date"], df["sys"], "g", label=f'Sys')
-        plt.plot(df["date"], df["dia"], "b", label=f'Dia')
+        l0, = plt.plot(df["date"], df["sys"], "g", label='Sys')
+        l1, = plt.plot(df["date"], df["dia"], "b", label='Dia')
+        l2, = plt.plot(df["date"], df["pulse"], "k", label='Pulse', visible=False)
 
         max_sys: int = int(df['sys'].max(numeric_only=True)) + 1
         min_sys: int = int(df['sys'].min(numeric_only=True)) - 1
@@ -110,7 +111,7 @@ class Pression:
         plt.gca().xaxis.set_minor_locator(mdates.DayLocator(interval=7))
         plt.xticks(rotation=45, ha='right', fontsize='small')
 
-        plt.legend()
+        # plt.legend()
         plt.tight_layout()
         plt.grid(which="both")
         plt.grid(which="major", linewidth=1)
@@ -143,6 +144,23 @@ class Pression:
 
         plt.title(f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
         plt.savefig(PATH + 'pression.png')
+
+        def callback(label):
+            ln = lines_by_label[label]
+            ln.set_visible(not ln.get_visible())
+            ln.figure.canvas.draw_idle()
+
+        lines_by_label = {l.get_label(): l for l in [l0, l1, l2]}
+        line_colors = [l.get_color() for l in lines_by_label.values()]
+        check = CheckButtons(
+            ax=ax.inset_axes((0.0, 0.0, 0.05, 0.1)),
+            labels=list(lines_by_label.keys()),
+            actives=[l.get_visible() for l in lines_by_label.values()],
+            label_props={'color': line_colors},
+            frame_props={'edgecolor': line_colors},
+            check_props={'facecolor': line_colors},
+        )
+        check.on_clicked(callback)
         plt.show()
 
     @staticmethod
