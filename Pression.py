@@ -19,7 +19,7 @@ VERSION = 3
 PATH = "G:/My Drive/PoidsPression/"
 DAYS = 30.437 * 2
 
-LOG_PATH = f"{PATH}logs/"
+LOG_PATH = "C:/Users/rivoi/Documents/PoidsPression/logs/"
 LOG_FILE = f'{LOG_PATH}Pression.log'
 
 
