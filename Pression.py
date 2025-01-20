@@ -141,8 +141,8 @@ class Pression:
         mask = df['date'] > last_month
         df2 = df.loc[mask]
         log.info(f"x: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}")
-
-        plt.title(f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1]}')
+        pressure_list[len(pressure_list) - 1]['date'].strftime('%Y/%m/%d %H:%M')
+        plt.title(f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, Dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
         plt.savefig(PATH + 'pression.png')
 
         def callback(label):
