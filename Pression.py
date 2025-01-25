@@ -16,7 +16,7 @@ from matplotlib.widgets import CheckButtons
 import pandas as pd
 
 VERSION = 3
-PATH = "G:/My Drive/PoidsPression/"
+PATH = "G:/Mon disque/PoidsPression/"
 DAYS = 30.437 * 2
 
 LOG_PATH = "C:/Users/rivoi/Documents/PoidsPression/logs/"

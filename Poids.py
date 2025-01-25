@@ -15,7 +15,7 @@ from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 import pandas as pd
 
-PATH = "G:/My Drive/PoidsPression/"
+PATH = "G:/Mon disque/PoidsPression/"
 DL_PATH = "C:/Users/rivoi/Downloads/"
 CLOUD_PATH = DL_PATH + "Takeout/Fit/All Data/"
 JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
