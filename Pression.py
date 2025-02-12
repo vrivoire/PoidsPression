@@ -19,7 +19,7 @@ VERSION = 3
 PATH = "G:/Mon disque/PoidsPression/"
 DAYS = 30.437 * 2
 
-LOG_PATH = "C:/Users/rivoi/Documents/PoidsPression/logs/"
+LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
 LOG_FILE = f'{LOG_PATH}Pression.log'
 
 

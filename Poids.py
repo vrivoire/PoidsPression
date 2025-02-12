@@ -23,7 +23,7 @@ CSV_FILE = "Renpho Health R_PmJP0.csv"
 ZIP_FILE = "takeout-*.zip"
 DAYS = 180
 
-LOG_PATH = "C:/Users/rivoi/Documents/PoidsPression/logs/"
+LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
 LOG_FILE = f'{LOG_PATH}Poids.log'
 
 
