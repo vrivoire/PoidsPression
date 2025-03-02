@@ -123,13 +123,23 @@ def display_graph():
     def update(val):
         slider_position.valtext.set_text(num2date(val).date())
         df2 = df.set_index(['date']).loc[num2date(val - 50).date():num2date(val).date()]
-        window = [val - 50, val + 1, df2['kg'].min(numeric_only=True) - 0.5, df2['kg'].max(numeric_only=True) + 0.5]
+        window = [
+            val - 50,
+            val + 1,
+            df2['kg'].min(numeric_only=True) - 1,
+            df2['kg'].max(numeric_only=True) + 1
+        ]
         ax1.axis(window)
         fig.canvas.draw_idle()
 
     def reset(event):
         slider_position.reset()
-        window = [date2num(df["date"][0]), date2num(df['date'][len(df['date']) - 1]), min_kg, max_kg]
+        window = [
+            date2num(df["date"][0]),
+            date2num(df['date'][len(df['date']) - 1]),
+            df['kg'].min(numeric_only=True) - 1,
+            df['kg'].max(numeric_only=True) + 1
+        ]
         ax1.axis(window)
         fig.canvas.draw_idle()
 
@@ -190,7 +200,9 @@ if __name__ == "__main__":
 
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
+    df = df.filter(['kg', 'date'])
+    df['kg'] = df['kg'].apply(lambda x:round(x,2))
     df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
     log.info('\n')
-    log.info(df)
+    log.info(f'\n{df}')
     display_graph()
