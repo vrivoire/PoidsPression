@@ -122,8 +122,8 @@ def display_graph():
 
     def update(val):
         slider_position.valtext.set_text(num2date(val).date())
-        df2 = df.set_index(['date']).loc[num2date(val - 50).date():num2date(val + 50).date()]
-        window = [val - 50, val + 50, df2['kg'].min(numeric_only=True) - 0.5, df2['kg'].max(numeric_only=True) + 0.5]
+        df2 = df.set_index(['date']).loc[num2date(val - 50).date():num2date(val).date()]
+        window = [val - 50, val + 1, df2['kg'].min(numeric_only=True) - 0.5, df2['kg'].max(numeric_only=True) + 0.5]
         ax1.axis(window)
         fig.canvas.draw_idle()
 
