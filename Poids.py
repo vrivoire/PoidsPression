@@ -202,7 +202,7 @@ if __name__ == "__main__":
     df = pd.DataFrame(sortedDatas)
     df = df.filter(['kg', 'date'])
     df['kg'] = df['kg'].apply(lambda x:round(x,2))
-    df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
+    df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, float_format='%.2f', date_format="%Y-%m-%dT%H:%M:%S")
     log.info('\n')
     log.info(f'\n{df}')
     display_graph()
