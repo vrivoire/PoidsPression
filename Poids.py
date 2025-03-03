@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import numpy as np
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 import pandas as pd
@@ -86,8 +87,8 @@ def display_graph():
     max_kg = df['kg'].max(numeric_only=True)
     min_kg = df['kg'].min(numeric_only=True)
     plt.title(f"Date: {df["date"][df["date"].size - 1].strftime('%Y/%m/%d %H:%M')}, Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (rolling x̄: {DAYS} days)")
-    max_kg = int(max_kg) + 1
-    min_kg = int(min_kg) - 1
+    max_kg = int(max_kg) + 0.5
+    min_kg = int(min_kg) - 0.5
     plt.axis((
         df['date'][0] - timedelta(days=10),
         df["date"][df["date"].size - 1] + timedelta(days=10),
@@ -123,11 +124,17 @@ def display_graph():
     def update(val):
         slider_position.valtext.set_text(num2date(val).date())
         df2 = df.set_index(['date']).loc[num2date(val - 50).date():num2date(val).date()]
+        min2 = df2['kg'].min(numeric_only=True) - 0.5
+        if np.isnan(min2):
+            min2 = df['kg'].min(numeric_only=True) - 0.5
+        max2 = df2['kg'].max(numeric_only=True) + 0.5
+        if np.isnan(max2):
+            max2 = df['kg'].max(numeric_only=True) + 0.5
         window = [
             val - 50,
             val + 1,
-            df2['kg'].min(numeric_only=True) - 1,
-            df2['kg'].max(numeric_only=True) + 1
+            min2,
+            max2
         ]
         ax1.axis(window)
         fig.canvas.draw_idle()
@@ -137,15 +144,16 @@ def display_graph():
         window = [
             date2num(df["date"][0]),
             date2num(df['date'][len(df['date']) - 1]),
-            df['kg'].min(numeric_only=True) - 1,
-            df['kg'].max(numeric_only=True) + 1
+            df['kg'].min(numeric_only=True) - 0.5,
+            df['kg'].max(numeric_only=True) + 0.5
         ]
         ax1.axis(window)
         fig.canvas.draw_idle()
 
     slider_position = Slider(
         plt.axes((0.08, 0.01, 0.73, 0.03), facecolor='White'),
-        'Date', date2num(df["date"][0]),
+        'Date',
+        date2num(df["date"][0]),
         date2num(df['date'][len(df['date']) - 1]),
         valstep=1,
         color='w',
