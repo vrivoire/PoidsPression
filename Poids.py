@@ -9,12 +9,12 @@ import os.path
 import shutil
 from datetime import datetime, timedelta
 
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
-import pandas as pd
 
 PATH = "G:/Mon disque/PoidsPression/"
 DL_PATH = "C:/Users/rivoi/Downloads/"
@@ -34,7 +34,8 @@ def namer(name: str) -> str:
 
 if not os.path.exists(LOG_PATH):
     os.mkdir(LOG_PATH)
-fileHandler = logging.handlers.TimedRotatingFileHandler(LOG_FILE, when='midnight', interval=1, backupCount=7, encoding=None, delay=False, utc=False, atTime=None, errors=None)
+fileHandler = logging.handlers.TimedRotatingFileHandler(LOG_FILE, when='midnight', interval=1, backupCount=7,
+                                                        encoding=None, delay=False, utc=False, atTime=None, errors=None)
 fileHandler.namer = namer
 log.basicConfig(
     level=logging.INFO,
@@ -50,7 +51,10 @@ def load_csv():
     if os.path.isfile(PATH + CSV_FILE):
         result = pd.read_csv(PATH + CSV_FILE)
         result = result.rename(columns={'Données de temps': 'date', 'Poids(kg)': 'kg'})
-        result = result.drop(['IMC', 'Graisse corporelle(%)', 'Poids hors masse grasse(kg)', 'Gras sous-cutané(%)', 'Graisse viscérale', 'Eau Corporelle Totale(%)', 'Muscle squelettique(%)', 'Masse musculaire(kg)', 'Masse osseuse(kg)', 'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Remarques'], axis=1)
+        result = result.drop(
+            ['IMC', 'Graisse corporelle(%)', 'Poids hors masse grasse(kg)', 'Gras sous-cutané(%)', 'Graisse viscérale',
+             'Eau Corporelle Totale(%)', 'Muscle squelettique(%)', 'Masse musculaire(kg)', 'Masse osseuse(kg)',
+             'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Remarques'], axis=1)
         result = result.astype({'date': 'datetime64[ns]'})
         result = result.astype({'kg': 'float'})
         return result.to_dict('records')
@@ -86,7 +90,8 @@ def display_graph():
     plt.grid(which="minor", linewidth=0.2)
     max_kg = df['kg'].max(numeric_only=True)
     min_kg = df['kg'].min(numeric_only=True)
-    plt.title(f"Date: {df["date"][df["date"].size - 1].strftime('%Y/%m/%d %H:%M')}, Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (rolling x̄: {DAYS} days)")
+    plt.title(
+        f"Date: {df["date"][df["date"].size - 1].strftime('%Y/%m/%d %H:%M')}, Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (rolling x̄: {DAYS} days)")
     max_kg = int(max_kg) + 0.5
     min_kg = int(min_kg) - 0.5
     plt.axis((
@@ -209,7 +214,7 @@ if __name__ == "__main__":
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
     df = df.filter(['kg', 'date'])
-    df['kg'] = df['kg'].apply(lambda x:round(x,2))
+    df['kg'] = df['kg'].apply(lambda x: round(x, 2))
     df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, float_format='%.2f', date_format="%Y-%m-%dT%H:%M:%S")
     log.info('\n')
     log.info(f'\n{df}')
