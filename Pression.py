@@ -12,8 +12,8 @@ from typing import Any
 import dateutil.relativedelta
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-from matplotlib.widgets import CheckButtons
 import pandas as pd
+from matplotlib.widgets import CheckButtons
 
 VERSION = 3
 PATH = "G:/Mon disque/PoidsPression/"
@@ -29,7 +29,8 @@ def namer(name: str) -> str:
 
 if not os.path.exists(LOG_PATH):
     os.mkdir(LOG_PATH)
-fileHandler = logging.handlers.TimedRotatingFileHandler(LOG_FILE, when='midnight', interval=1, backupCount=7, encoding=None, delay=False, utc=False, atTime=None, errors=None)
+fileHandler = logging.handlers.TimedRotatingFileHandler(LOG_FILE, when='midnight', interval=1, backupCount=7,
+                                                        encoding=None, delay=False, utc=False, atTime=None, errors=None)
 fileHandler.namer = namer
 log.basicConfig(
     level=logging.INFO,
@@ -142,7 +143,8 @@ class Pression:
         df2 = df.loc[mask]
         log.info(f"x: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}")
         pressure_list[len(pressure_list) - 1]['date'].strftime('%Y/%m/%d %H:%M')
-        plt.title(f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, Dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
+        plt.title(
+            f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, Dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
         plt.savefig(PATH + 'pression.png')
 
         def callback(label):
@@ -178,7 +180,8 @@ class Dialog:
         Dialog.ROOT.resizable(False, False)
 
         row = tk.Frame(Dialog.ROOT)
-        tk.Label(row, width=20, text=f"Pression v{VERSION}", anchor='center', font=('calibre', 12, 'bold')).pack(side=tk.LEFT)
+        tk.Label(row, width=20, text=f"Pression v{VERSION}", anchor='center', font=('calibre', 12, 'bold')).pack(
+            side=tk.LEFT)
         row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
 
         entries: list[tuple[Any, Entry, IntVar]] = self.make_form()
@@ -199,7 +202,9 @@ class Dialog:
             row = tk.Frame(Dialog.ROOT)
             tk.Label(row, width=6, text=field, anchor='w', font=('calibre', 12, 'bold')).pack(side=tk.LEFT)
             intVar = tk.IntVar(value='')
-            ent = tk.Entry(row, textvariable=intVar, validate='key', validatecommand=(Dialog.ROOT.register(self.validate), '%S', '%P'), font=('calibre', 12, 'normal'), width=4)
+            ent = tk.Entry(row, textvariable=intVar, validate='key',
+                           validatecommand=(Dialog.ROOT.register(self.validate), '%S', '%P'),
+                           font=('calibre', 12, 'normal'), width=4)
             row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
             ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
             entries.append((field, ent, intVar))

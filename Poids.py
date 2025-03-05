@@ -201,7 +201,11 @@ if __name__ == "__main__":
     if os.path.isfile(DL_PATH + CSV_FILE):
         shutil.copy2(DL_PATH + CSV_FILE, PATH)
         os.remove(DL_PATH + CSV_FILE)
+
     csv_data = load_csv()
+
+    if os.path.isfile(PATH + CSV_FILE):
+        os.remove(PATH + CSV_FILE)
 
     results = []
     cloud_data.extend(csv_data)
