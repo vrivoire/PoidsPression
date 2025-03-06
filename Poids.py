@@ -47,21 +47,28 @@ log.basicConfig(
 )
 
 
-def load_csv():
-    if os.path.isfile(PATH + CSV_FILE):
-        result = pd.read_csv(PATH + CSV_FILE)
+def load_csv(file_name):
+    log.info(f'Looking for {file_name}')
+    if os.path.isfile(file_name):
+        result = pd.read_csv(file_name)
         result = result.rename(columns={'Données de temps': 'date', 'Poids(kg)': 'kg'})
-        result = result.drop(
-            ['IMC', 'Graisse corporelle(%)', 'Poids hors masse grasse(kg)', 'Gras sous-cutané(%)', 'Graisse viscérale',
-             'Eau Corporelle Totale(%)', 'Muscle squelettique(%)', 'Masse musculaire(kg)', 'Masse osseuse(kg)',
-             'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Remarques'], axis=1)
+        try:
+            result = result.drop(
+                ['IMC', 'Graisse corporelle(%)', 'Poids hors masse grasse(kg)', 'Gras sous-cutané(%)', 'Graisse viscérale',
+                 'Eau Corporelle Totale(%)', 'Muscle squelettique(%)', 'Masse musculaire(kg)', 'Masse osseuse(kg)',
+                 'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Remarques'], axis=1)
+        except KeyError as ex1:
+            pass
         result = result.astype({'date': 'datetime64[ns]'})
         result = result.astype({'kg': 'float'})
         return result.to_dict('records')
+    else:
+        log.info(f'Not found file {file_name}.')
     return []
 
 
 def add_data(file_name):
+    log.info(f'Looking for {file_name}')
     data = []
     result = pd.read_json(file_name)
     for dataPoint in result["Data Points"]:
@@ -202,18 +209,20 @@ if __name__ == "__main__":
         shutil.copy2(DL_PATH + CSV_FILE, PATH)
         os.remove(DL_PATH + CSV_FILE)
 
-    csv_data = load_csv()
-
+    csv_data1 = load_csv(PATH + CSV_FILE)
     if os.path.isfile(PATH + CSV_FILE):
         os.remove(PATH + CSV_FILE)
 
+    csv_data2 = load_csv(PATH + 'poids.csv')
+    csv_data1.extend(csv_data2)
+
     results = []
-    cloud_data.extend(csv_data)
+    cloud_data.extend(csv_data1)
     for myDict in cloud_data:
         if myDict not in results:
             results.append(myDict)
-        else:
-            log.info(myDict)
+        # else:
+        #     log.info(myDict)
 
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
