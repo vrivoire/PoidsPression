@@ -13,7 +13,9 @@ import dateutil.relativedelta
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import CheckButtons
+from matplotlib.widgets import Slider, Button
 
 VERSION = 3
 PATH = "G:/Mon disque/PoidsPression/"
@@ -65,18 +67,19 @@ class Pression:
 
     @staticmethod
     def display_graph(pressure_list: list[dict[str, datetime]]) -> None:
+        fig, ax1 = plt.subplots()
         df: pd.DataFrame = pd.DataFrame(pressure_list)
 
         mean = df.rolling(window=f'{DAYS}D', on='date')['sys'].mean()
-        plt.plot(df["date"], mean, color='darkgreen')
+        ax1.plot(df["date"], mean, color='darkgreen')
         mean = df.rolling(window=f'{DAYS}D', on='date')['dia'].mean()
-        plt.plot(df["date"], mean, color='darkblue')
+        ax1.plot(df["date"], mean, color='royalblue')
         # mean = df["pulse"].rolling(window=WINDOW).mean()
         # plt.plot(df["date"], mean, color='darkred')
 
-        l0, = plt.plot(df["date"], df["sys"], "g", label='Sys')
-        l1, = plt.plot(df["date"], df["dia"], "b", label='Dia')
-        l2, = plt.plot(df["date"], df["pulse"], "k", label='Pulse', visible=False)
+        l0, = ax1.plot(df["date"], df["sys"], "g", label='Sys')
+        l1, = ax1.plot(df["date"], df["dia"], "b", label='Dia')
+        l2, = ax1.plot(df["date"], df["pulse"], "k", label='Pulse', visible=False)
 
         max_sys: int = int(df['sys'].max(numeric_only=True)) + 1
         min_sys: int = int(df['sys'].min(numeric_only=True)) - 1
@@ -112,7 +115,6 @@ class Pression:
         plt.gca().xaxis.set_minor_locator(mdates.DayLocator(interval=7))
         plt.xticks(rotation=45, ha='right', fontsize='small')
 
-        # plt.legend()
         plt.tight_layout()
         plt.grid(which="both")
         plt.grid(which="major", linewidth=1)
@@ -144,7 +146,7 @@ class Pression:
         log.info(f"x: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}")
         pressure_list[len(pressure_list) - 1]['date'].strftime('%Y/%m/%d %H:%M')
         plt.title(
-            f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, Dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
+            f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}), sys: {df['sys'][len(df['sys']) - 1]}, dia: {df['dia'][len(df['dia']) - 1]}, pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
         plt.savefig(PATH + 'pression.png')
 
         def callback_on_clicked(label):
@@ -164,12 +166,47 @@ class Pression:
         )
         check.on_clicked(callback_on_clicked)
 
+        def callback_update(val):
+            slider_position.valtext.set_text(num2date(val).date())
+            window = [
+                val - DAYS,
+                val + 1,
+                minimum,
+                maximum
+            ]
+            ax1.axis(window)
+            fig.canvas.draw_idle()
+
+        def callback_reset(event):
+            slider_position.reset()
+            window = [
+                date2num(df["date"][0]),
+                date2num(df['date'][len(df['date']) - 1]),
+                minimum,
+                maximum
+            ]
+            ax1.axis(window)
+            fig.canvas.draw_idle()
+
+        slider_position = Slider(
+            plt.axes((0.08, 0.01, 0.73, 0.03), facecolor='White'),
+            'Date',
+            date2num(df["date"][0]),
+            date2num(df['date'][len(df['date']) - 1]),
+            valstep=1,
+            color='w',
+            initcolor='none'
+        )
+        slider_position.valtext.set_text(df["date"][0].date())
+        slider_position.on_changed(callback_update)
+        button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
+        button.on_clicked(callback_reset)
+
         plt.show()
 
     @staticmethod
     def add_line(line: dict) -> None:
         pressure_list.append(line)
-        log.info(line)
 
 
 class Dialog:
@@ -243,7 +280,7 @@ if __name__ == "__main__":
         pressure_list = pression.load_csv()
         dialog: Dialog = Dialog(pression)
 
-        log.info(f"\n{pd.DataFrame(pressure_list).to_string()}")
+        log.info(f"\n{pd.DataFrame(pressure_list)}")
         pression.save_csv(pressure_list)
         pression.display_graph(pressure_list)
         log.info("--- %s seconds ---" % (time.time() - start_time))
