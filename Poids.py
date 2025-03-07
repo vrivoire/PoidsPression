@@ -54,7 +54,8 @@ def load_csv(file_name):
         result = result.rename(columns={'Données de temps': 'date', 'Poids(kg)': 'kg'})
         try:
             result = result.drop(
-                ['IMC', 'Graisse corporelle(%)', 'Poids hors masse grasse(kg)', 'Gras sous-cutané(%)', 'Graisse viscérale',
+                ['IMC', 'Graisse corporelle(%)', 'Poids hors masse grasse(kg)', 'Gras sous-cutané(%)',
+                 'Graisse viscérale',
                  'Eau Corporelle Totale(%)', 'Muscle squelettique(%)', 'Masse musculaire(kg)', 'Masse osseuse(kg)',
                  'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Remarques'], axis=1)
         except KeyError as ex1:
@@ -133,9 +134,9 @@ def display_graph():
     fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
     plt.savefig(PATH + 'Poids.png')
 
-    def update(val):
+    def callback_update(val):
         slider_position.valtext.set_text(num2date(val).date())
-        df2 = df.set_index(['date']).loc[num2date(val - 50).date():num2date(val).date()]
+        df2 = df.set_index(['date']).loc[num2date(val - 60).date():num2date(val).date()]
         min2 = df2['kg'].min(numeric_only=True) - 0.5
         if np.isnan(min2):
             min2 = df['kg'].min(numeric_only=True) - 0.5
@@ -148,10 +149,14 @@ def display_graph():
             min2,
             max2
         ]
+        print()
+        print(num2date(val - 60))
+        print(num2date(val + 1))
+
         ax1.axis(window)
         fig.canvas.draw_idle()
 
-    def reset(event):
+    def callback_reset(event):
         slider_position.reset()
         window = [
             date2num(df["date"][0]),
@@ -172,9 +177,9 @@ def display_graph():
         initcolor='none'
     )
     slider_position.valtext.set_text(df["date"][0].date())
-    slider_position.on_changed(update)
+    slider_position.on_changed(callback_update)
     button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
-    button.on_clicked(reset)
+    button.on_clicked(callback_reset)
 
     plt.show()
 
@@ -189,10 +194,10 @@ if __name__ == "__main__":
     if os.path.isfile(CLOUD_PATH + JSON_FILE):
         shutil.copy2(CLOUD_PATH + JSON_FILE, PATH)
         shutil.rmtree(CLOUD_PATH + '/../..')
-
     cloud_data = []
-    if len(cloud_data) == 0:
+    if os.path.isfile(PATH + JSON_FILE):
         cloud_data = add_data(PATH + JSON_FILE)
+        os.remove(PATH + JSON_FILE)
 
     csv_file = PATH + CSV_FILE
     log.info(f"csv_file = {csv_file}")

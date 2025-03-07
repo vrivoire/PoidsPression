@@ -147,7 +147,7 @@ class Pression:
             f'Pression (x̄: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, Dia: {int(df2['dia'].mean())}), Sys: {df['sys'][len(df['sys']) - 1]}, Dia: {df['dia'][len(df['dia']) - 1]}, Pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
         plt.savefig(PATH + 'pression.png')
 
-        def callback(label):
+        def callback_on_clicked(label):
             ln = lines_by_label[label]
             ln.set_visible(not ln.get_visible())
             ln.figure.canvas.draw_idle()
@@ -162,7 +162,8 @@ class Pression:
             frame_props={'edgecolor': line_colors},
             check_props={'facecolor': line_colors},
         )
-        check.on_clicked(callback)
+        check.on_clicked(callback_on_clicked)
+
         plt.show()
 
     @staticmethod
