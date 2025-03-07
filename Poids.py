@@ -22,7 +22,7 @@ CLOUD_PATH = DL_PATH + "Takeout/Fit/All Data/"
 JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
 CSV_FILE = "Renpho Health R_PmJP0.csv"
 ZIP_FILE = "takeout-*.zip"
-DAYS = 180
+DAYS = 30.437 * 3
 
 LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
 LOG_FILE = f'{LOG_PATH}Poids.log'
@@ -99,7 +99,7 @@ def display_graph():
     max_kg = df['kg'].max(numeric_only=True)
     min_kg = df['kg'].min(numeric_only=True)
     plt.title(
-        f"Date: {df["date"][df["date"].size - 1].strftime('%Y/%m/%d %H:%M')}, Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (rolling x̄: {DAYS} days)")
+        f"Date: {df["date"][df["date"].size - 1].strftime('%Y/%m/%d %H:%M')}, Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (rolling x̄: {int(DAYS)} days)")
     max_kg = int(max_kg) + 0.5
     min_kg = int(min_kg) - 0.5
     plt.axis((
@@ -136,7 +136,7 @@ def display_graph():
 
     def callback_update(val):
         slider_position.valtext.set_text(num2date(val).date())
-        df2 = df.set_index(['date']).loc[num2date(val - 60).date():num2date(val).date()]
+        df2 = df.set_index(['date']).loc[num2date(val - DAYS).date():num2date(val).date()]
         min2 = df2['kg'].min(numeric_only=True) - 0.5
         if np.isnan(min2):
             min2 = df['kg'].min(numeric_only=True) - 0.5
@@ -144,15 +144,11 @@ def display_graph():
         if np.isnan(max2):
             max2 = df['kg'].max(numeric_only=True) + 0.5
         window = [
-            val - 50,
+            val - DAYS,
             val + 1,
             min2,
             max2
         ]
-        print()
-        print(num2date(val - 60))
-        print(num2date(val + 1))
-
         ax1.axis(window)
         fig.canvas.draw_idle()
 
@@ -226,8 +222,6 @@ if __name__ == "__main__":
     for myDict in cloud_data:
         if myDict not in results:
             results.append(myDict)
-        # else:
-        #     log.info(myDict)
 
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
