@@ -63,7 +63,10 @@ class Pression:
     @staticmethod
     def save_csv(pressure_list: list[dict[str, datetime]]) -> None:
         df: pd.DataFrame = pd.DataFrame(pressure_list)
-        df.to_csv(f'{PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
+        if os.path.isfile(PATH + 'poids.csv'):
+            df.to_csv(f'{PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y-%m-%dT%H:%M:%S")
+        else:
+            log.warn(f'File not found: {PATH}pression.csv')
 
     @staticmethod
     def display_graph(pressure_list: list[dict[str, datetime]]) -> None:
