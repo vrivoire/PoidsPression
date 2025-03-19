@@ -18,7 +18,9 @@ from matplotlib.widgets import CheckButtons
 from matplotlib.widgets import Slider, Button
 
 VERSION = 3
-PATH = "G:/Mon disque/PoidsPression/"
+HOME_PATH = f"{os.getenv('USERPROFILE')}/"
+PATH = f"{HOME_PATH}GoogleDrive/PoidsPression/"
+
 DAYS = 30.437 * 2
 
 LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
