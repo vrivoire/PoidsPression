@@ -16,8 +16,7 @@ import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 
-HOME_PATH = f"{os.getenv('USERPROFILE')}/"
-PATH = f"{HOME_PATH}GoogleDrive/PoidsPression/"
+PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
 DL_PATH = "C:/Users/adele/Downloads/"
 CLOUD_PATH = DL_PATH + "Takeout/Fit/All Data/"
 JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
