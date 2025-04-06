@@ -78,8 +78,8 @@ class Pression:
         ax1.plot(df["date"], mean, color='darkgreen')
         mean = df.rolling(window=f'{DAYS}D', on='date')['dia'].mean()
         ax1.plot(df["date"], mean, color='royalblue')
-        # mean = df["pulse"].rolling(window=WINDOW).mean()
-        # plt.plot(df["date"], mean, color='darkred')
+        mean = df.rolling(window=f'{DAYS}D', on='date')['pulse'].mean()
+        plt.plot(df["date"], mean, color='gray')
 
         l0, = ax1.plot(df["date"], df["sys"], "g", label='Sys')
         l1, = ax1.plot(df["date"], df["dia"], "b", label='Dia')
