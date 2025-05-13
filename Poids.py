@@ -20,7 +20,7 @@ PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
 DL_PATH = "C:/Users/adele/Downloads/"
 CLOUD_PATH = DL_PATH + "Takeout/Fit/All Data/"
 JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
-CSV_FILE = "Renpho Health R_PmJP0.csv"
+CSV_FILE = "Renpho Health-R_PmJP0.csv"
 ZIP_FILE = "takeout-*.zip"
 DAYS = 30.437 * 3
 
@@ -51,15 +51,23 @@ def load_csv(file_name):
     log.info(f'Looking for {file_name}')
     if os.path.isfile(file_name):
         result = pd.read_csv(file_name)
-        result = result.rename(columns={'Données de temps': 'date', 'Poids(kg)': 'kg'})
+        result = result.rename(columns={'La date': 'date', 'Temps': 'time', 'Poids(kg)': 'kg'})
+        # result = result.rename(columns={'La date': 'date', 'Poids(kg)': 'kg'})
         try:
             result = result.drop(
-                ['IMC', 'Graisse corporelle(%)', 'Poids hors masse grasse(kg)', 'Gras sous-cutané(%)',
-                 'Graisse viscérale',
-                 'Eau Corporelle Totale(%)', 'Muscle squelettique(%)', 'Masse musculaire(kg)', 'Masse osseuse(kg)',
-                 'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Remarques'], axis=1)
+                ['Temps', 'IMC','Graisse corporelle(%)','Muscle squelettique(%)','Poids hors masse grasse(kg)','Gras sous-cutané(%)','Graisse viscérale','Eau Corporelle Totale(%)','Masse musculaire(kg)','Masse osseuse(kg)',
+                 'Protéines(%)','Métabolisme de base(kcal)','Âge métabolique','Poids optimal(kg)','Objectif de poids optimal(kg)','Objectif masse grasse optimale(kg)','Objectif de masse musculaire optimale(kg)','Type de corps','Remarques'],
+                axis=1)
         except KeyError as ex1:
             pass
+
+        try:
+            t = result['time']
+            result['date'] = pd.to_datetime(result['date'] + ' ' + result['time'], format="%Y.%m.%d %H:%M:%S")
+            result = result.drop(['time'], axis=1)
+        except KeyError as ex1:
+           pass
+
         result = result.astype({'date': 'datetime64[ns]'})
         result = result.astype({'kg': 'float'})
         return result.to_dict('records')
@@ -227,6 +235,9 @@ if __name__ == "__main__":
     df = pd.DataFrame(sortedDatas)
     df = df.filter(['kg', 'date'])
     df['kg'] = df['kg'].apply(lambda x: round(x, 2))
+
+    df = df.drop(df[(df['date'].dt.hour == 0) & (df['date'].dt.minute == 0) & (df['date'].dt.second == 0)].index)
+    df = df.drop_duplicates(subset=['kg', 'date'], keep='first')
 
     if os.path.isfile(PATH + 'poids.csv'):
         df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, float_format='%.2f',
