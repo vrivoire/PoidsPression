@@ -1,12 +1,13 @@
 # Takeout
 # https://takeout.google.com/
 
-
+import ctypes
 import glob
 import logging as log
 import logging.handlers
 import os.path
 import shutil
+import time
 from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
@@ -55,8 +56,12 @@ def load_csv(file_name):
         # result = result.rename(columns={'La date': 'date', 'Poids(kg)': 'kg'})
         try:
             result = result.drop(
-                ['Temps', 'IMC','Graisse corporelle(%)','Muscle squelettique(%)','Poids hors masse grasse(kg)','Gras sous-cutané(%)','Graisse viscérale','Eau Corporelle Totale(%)','Masse musculaire(kg)','Masse osseuse(kg)',
-                 'Protéines(%)','Métabolisme de base(kcal)','Âge métabolique','Poids optimal(kg)','Objectif de poids optimal(kg)','Objectif masse grasse optimale(kg)','Objectif de masse musculaire optimale(kg)','Type de corps','Remarques'],
+                ['Temps', 'IMC', 'Graisse corporelle(%)', 'Muscle squelettique(%)', 'Poids hors masse grasse(kg)',
+                 'Gras sous-cutané(%)', 'Graisse viscérale', 'Eau Corporelle Totale(%)', 'Masse musculaire(kg)',
+                 'Masse osseuse(kg)',
+                 'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Poids optimal(kg)',
+                 'Objectif de poids optimal(kg)', 'Objectif masse grasse optimale(kg)',
+                 'Objectif de masse musculaire optimale(kg)', 'Type de corps', 'Remarques'],
                 axis=1)
         except KeyError as ex1:
             pass
@@ -66,7 +71,7 @@ def load_csv(file_name):
             result['date'] = pd.to_datetime(result['date'] + ' ' + result['time'], format="%Y.%m.%d %H:%M:%S")
             result = result.drop(['time'], axis=1)
         except KeyError as ex1:
-           pass
+            pass
 
         result = result.astype({'date': 'datetime64[ns]'})
         result = result.astype({'kg': 'float'})
@@ -107,12 +112,12 @@ def display_graph():
     max_kg = df['kg'].max(numeric_only=True)
     min_kg = df['kg'].min(numeric_only=True)
     plt.title(
-        f"Date: {df["date"][df["date"].size - 1].strftime('%Y/%m/%d %H:%M')}, Poids: {df['kg'][len(df['kg']) - 1]}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean[mean.size - 1], 2)}Kg (rolling x̄: {int(DAYS)} days)")
+        f"Date: {df["date"].tail(1).item().strftime('%Y/%m/%d %H:%M')}, Poids: {df["kg"].tail(1).item()}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean.tail(1).item(), 2)}Kg (rolling x̄: {int(DAYS)} days)")
     max_kg = int(max_kg) + 0.5
     min_kg = int(min_kg) - 0.5
     plt.axis((
         df['date'][0] - timedelta(days=10),
-        df["date"][df["date"].size - 1] + timedelta(days=10),
+        df["date"].tail(1).item() + timedelta(days=10),
         min_kg,
         max_kg
     ))
@@ -175,7 +180,7 @@ def display_graph():
         plt.axes((0.08, 0.01, 0.73, 0.03), facecolor='White'),
         'Date',
         date2num(df["date"][0]),
-        date2num(df['date'][len(df['date']) - 1]),
+        date2num(df['date'].tail(1).item()),
         valstep=1,
         color='w',
         initcolor='none'
@@ -189,6 +194,15 @@ def display_graph():
 
 
 if __name__ == "__main__":
+    i = 0
+    while not os.path.exists(PATH + 'poids.csv') and i < 5:
+        log.warning(f'The path "{PATH + 'poids.csv'}" not ready.')
+        i += 1
+        time.sleep(10)
+    if not os.path.exists(PATH + 'poids.csv'):
+        ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
+        os.abort()
+
     zip_list = glob.glob(DL_PATH + ZIP_FILE)
     if len(zip_list) > 0:
         log.info("Found zipfile from Takeout: " + zip_list[0])

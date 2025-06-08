@@ -1,3 +1,4 @@
+import ctypes
 import logging as log
 import logging.handlers
 import os
@@ -275,6 +276,15 @@ class Dialog:
 
 if __name__ == "__main__":
     try:
+        i = 0
+        while not os.path.exists(f'{PATH}pression.csv') and i < 5:
+            log.warning(f'The path "{f'{PATH}pression.csv'}" not ready.')
+            i += 1
+            time.sleep(10)
+        if not os.path.exists(f'{PATH}pression.csv'):
+            ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
+            os.abort()
+
         pression: Pression = Pression()
 
         start_time: float = time.time()
