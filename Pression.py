@@ -283,7 +283,7 @@ if __name__ == "__main__":
             time.sleep(10)
         if not os.path.exists(f'{PATH}pression.csv'):
             ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
-            os.abort()
+            sys.exit()
 
         pression: Pression = Pression()
 

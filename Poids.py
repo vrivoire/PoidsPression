@@ -201,7 +201,7 @@ if __name__ == "__main__":
         time.sleep(10)
     if not os.path.exists(PATH + 'poids.csv'):
         ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
-        os.abort()
+        sys.exit()
 
     zip_list = glob.glob(DL_PATH + ZIP_FILE)
     if len(zip_list) > 0:
