@@ -7,10 +7,11 @@ import time
 import tkinter as tk
 import traceback
 from datetime import datetime, timedelta
-from tkinter import Entry, IntVar, Tk
+from tkinter import Entry, IntVar, Tk, PhotoImage
 from typing import Any
 
 import dateutil.relativedelta
+import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -20,6 +21,7 @@ from matplotlib.widgets import Slider, Button
 
 VERSION = 3
 PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
+LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
 
 DAYS = 30.437 * 2
 
@@ -207,6 +209,10 @@ class Pression:
         button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
         button.on_clicked(callback_reset)
 
+        thismanager = matplotlib.pyplot.get_current_fig_manager()
+        img = PhotoImage(file=f'{LOCATION}pression.png')
+        thismanager.window.tk.call('wm', 'iconphoto', thismanager.window._w, img)
+
         plt.show()
 
     @staticmethod
@@ -233,6 +239,10 @@ class Dialog:
         tk.Button(text='Show', width=20, command=lambda: self.submit(entries)).pack(padx=5, pady=5)
 
         entries[0][1].focus()
+
+        photo = tk.PhotoImage(file=f'{LOCATION}pression.png')
+        Dialog.ROOT.wm_iconphoto(False, photo)
+
         Dialog.ROOT.mainloop()
 
     @staticmethod

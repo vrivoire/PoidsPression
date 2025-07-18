@@ -6,10 +6,13 @@ import glob
 import logging as log
 import logging.handlers
 import os.path
+import sys
 import shutil
 import time
 from datetime import datetime, timedelta
+from tkinter import PhotoImage
 
+import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,6 +31,7 @@ DAYS = 30.437 * 3
 LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
 LOG_FILE = f'{LOG_PATH}Poids.log'
 
+LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
 
 def namer(name: str) -> str:
     return name.replace(".log", "") + ".log"
@@ -189,6 +193,10 @@ def display_graph():
     slider_position.on_changed(callback_update)
     button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
     button.on_clicked(callback_reset)
+
+    thismanager = matplotlib.pyplot.get_current_fig_manager()
+    img = PhotoImage(file=f'{LOCATION}poids.png')
+    thismanager.window.tk.call('wm', 'iconphoto', thismanager.window._w, img)
 
     plt.show()
 
