@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
     if os.path.isfile(PATH + 'poids.csv'):
         df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, float_format='%.2f',
-                  date_format="%Y-%m-%dT%H:%M:%S")
+                  date_format="%Y/%m/%d %H:%M:%S")
     else:
         log.warn('File not found: ' + PATH + 'poids.csv')
 
