@@ -1,6 +1,4 @@
 import ctypes
-import logging as log
-import logging.handlers
 import os
 import sys
 import time
@@ -19,34 +17,14 @@ from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import CheckButtons
 from matplotlib.widgets import Slider, Button
 
+import poidspression
+from poidspression import log
+
 VERSION = 3
 PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
 LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
 
 DAYS = 30.437 * 2
-
-LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
-LOG_FILE = f'{LOG_PATH}Pression.log'
-
-
-def namer(name: str) -> str:
-    return name.replace(".log", "") + ".log"
-
-
-if not os.path.exists(LOG_PATH):
-    os.mkdir(LOG_PATH)
-fileHandler = logging.handlers.TimedRotatingFileHandler(LOG_FILE, when='midnight', interval=1, backupCount=7,
-                                                        encoding=None, delay=False, utc=False, atTime=None, errors=None)
-fileHandler.namer = namer
-log.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)-8s] [%(filename)s.%(funcName)s:%(lineno)d] %(message)s",
-    handlers=[
-        fileHandler,
-        logging.StreamHandler()
-    ]
-)
-
 
 class Pression:
 
@@ -285,6 +263,7 @@ class Dialog:
 
 
 if __name__ == "__main__":
+    poidspression.set_up(__file__)
     try:
         i = 0
         while not os.path.exists(f'{PATH}pression.csv') and i < 5:

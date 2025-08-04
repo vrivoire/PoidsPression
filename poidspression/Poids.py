@@ -19,6 +19,8 @@ import numpy as np
 import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
+import poidspression
+from poidspression import log
 
 PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
 DL_PATH = "C:/Users/adele/Downloads/"
@@ -27,30 +29,7 @@ JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
 CSV_FILE = "Renpho Health-R_PmJP0.csv"
 ZIP_FILE = "takeout-*.zip"
 DAYS = 30.437 * 3
-
-LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
-LOG_FILE = f'{LOG_PATH}Poids.log'
-
 LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
-
-def namer(name: str) -> str:
-    return name.replace(".log", "") + ".log"
-
-
-if not os.path.exists(LOG_PATH):
-    os.mkdir(LOG_PATH)
-fileHandler = logging.handlers.TimedRotatingFileHandler(LOG_FILE, when='midnight', interval=1, backupCount=7,
-                                                        encoding=None, delay=False, utc=False, atTime=None, errors=None)
-fileHandler.namer = namer
-log.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)-8s] [%(filename)s.%(funcName)s:%(lineno)d] %(message)s",
-    handlers=[
-        fileHandler,
-        logging.StreamHandler()
-    ]
-)
-
 
 def load_csv(file_name):
     log.info(f'Looking for {file_name}')
@@ -202,6 +181,8 @@ def display_graph():
 
 
 if __name__ == "__main__":
+    poidspression.set_up(__file__)
+
     i = 0
     while not os.path.exists(PATH + 'poids.csv') and i < 5:
         log.warning(f'The path "{PATH + 'poids.csv'}" not ready.')
