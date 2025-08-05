@@ -46,13 +46,13 @@ if __name__ == "__main__":
 
     last_date: datetime = load_csv()
     line: (datetime, datetime, str, timedelta) = get_date_diff(last_date, datetime.now().replace(second=0, microsecond=0))
-
+    get_j_cig = get_j_cig(line[3])
     save_csv([
         line[0].strftime('%d/%m/%Y %H:%M'),
         line[1].strftime('%d/%m/%Y %H:%M'),
         line[2],
-        get_j_cig(line[3]),
-        round(get_j_cig(line[3]) / 25, 1)
+        get_j_cig,
+        round(get_j_cig / 25, 1)
     ])
 
     if CIG_FILE_NAME != __file__.replace('\\', '/'):
