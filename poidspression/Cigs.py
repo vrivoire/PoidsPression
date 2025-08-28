@@ -1,7 +1,7 @@
 import csv
 import os.path
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import poidspression
 from poidspression import log
@@ -9,7 +9,7 @@ from poidspression import log
 PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
 LOG_PATH = f"{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/logs/"
 LOG_FILE = f'{LOG_PATH}Cigs.log'
-CIG_FILE_NAME = 'C:/Users/ADELE/Documents/NetBeansProjects/PycharmProjects/PoidsPression/poidspression/Cigs.py'
+CIG_FILE_NAME = f'{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/PoidsPression/poidspression/Cigs.py'
 
 
 def save_csv(fields):
@@ -22,37 +22,39 @@ def save_csv(fields):
 def load_csv() -> datetime:
     with open(PATH + 'Cigs.csv', 'r', newline='\n', encoding='utf-8') as f:
         reader = csv.reader(f)
-        last_date = None
+        _last_date = ''
         for row in reader:
             if len(row) > 0:
                 log.info(row)
-                last_date = row[1]
-        last_date = datetime.strptime(last_date, '%d/%m/%Y %H:%M')
-        return last_date
+                _last_date = row[1]
+        _last_date = datetime.strptime(_last_date, '%d/%m/%Y %H:%M')
+        return _last_date
 
 
-def get_date_diff(start: datetime, end: datetime) -> (datetime, datetime, str, timedelta):
-    return start, end, f'{abs(start - end)}', (end - start).total_seconds()
+def get_date_diff(_start: datetime, _end: datetime) -> tuple[datetime, datetime, str, float]:
+    return _start, _end, f'{abs(_start - _end)}', (_end - _start).total_seconds()
 
 
-def get_j_cig(seconds: int) -> float:
-    if seconds == 0:
-        seconds = 1
-    return round(200.0 / (seconds / 86400), 1)
+def get_j_pkg_cig(secs: float) -> tuple[float, float]:
+    if secs == 0:
+        secs = 1
+    _j_cig: float = round(200.0 / (secs / 86400), 1)
+    _pkg_cig: float = round(_j_cig / 25, 1)
+    return _j_cig, _pkg_cig
 
 
 if __name__ == "__main__":
     poidspression.set_up(__file__)
 
     last_date: datetime = load_csv()
-    line: (datetime, datetime, str, timedelta) = get_date_diff(last_date, datetime.now().replace(second=0, microsecond=0))
-    get_j_cig = get_j_cig(line[3])
+    start, end, diff, seconds = get_date_diff(last_date, datetime.now().replace(second=0, microsecond=0))
+    j_cig, pkg_cig = get_j_pkg_cig(seconds)
     save_csv([
-        line[0].strftime('%d/%m/%Y %H:%M'),
-        line[1].strftime('%d/%m/%Y %H:%M'),
-        line[2],
-        get_j_cig,
-        round(get_j_cig / 25, 1)
+        start.strftime('%d/%m/%Y %H:%M'),
+        end.strftime('%d/%m/%Y %H:%M'),
+        diff,
+        j_cig,
+        pkg_cig
     ])
 
     if CIG_FILE_NAME != __file__.replace('\\', '/'):

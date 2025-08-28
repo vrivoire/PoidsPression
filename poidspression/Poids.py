@@ -3,11 +3,9 @@
 
 import ctypes
 import glob
-import logging as log
-import logging.handlers
 import os.path
-import sys
 import shutil
+import sys
 import time
 from datetime import datetime, timedelta
 from tkinter import PhotoImage
@@ -19,6 +17,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
+
 import poidspression
 from poidspression import log
 
@@ -30,6 +29,7 @@ CSV_FILE = "Renpho Health-R_PmJP0.csv"
 ZIP_FILE = "takeout-*.zip"
 DAYS = 30.437 * 3
 LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
+
 
 def load_csv(file_name):
     log.info(f'Looking for {file_name}')
@@ -46,14 +46,13 @@ def load_csv(file_name):
                  'Objectif de poids optimal(kg)', 'Objectif masse grasse optimale(kg)',
                  'Objectif de masse musculaire optimale(kg)', 'Type de corps', 'Remarques'],
                 axis=1)
-        except KeyError as ex1:
+        except KeyError:
             pass
 
         try:
-            t = result['time']
             result['date'] = pd.to_datetime(result['date'] + ' ' + result['time'], format="%Y.%m.%d %H:%M:%S")
             result = result.drop(['time'], axis=1)
-        except KeyError as ex1:
+        except KeyError:
             pass
 
         result = result.astype({'date': 'datetime64[ns]'})
@@ -126,8 +125,8 @@ def display_graph():
         hspace=0.102
     )
     fig.canvas.manager.set_window_title('Poids')
-    DPI = fig.get_dpi()
-    fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
+    dpi = fig.get_dpi()
+    fig.set_size_inches(1280.0 / float(dpi), 720.0 / float(dpi))
     plt.savefig(PATH + 'Poids.png')
 
     def callback_update(val):

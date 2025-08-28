@@ -16,6 +16,7 @@ import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import CheckButtons
 from matplotlib.widgets import Slider, Button
+from pydantic.v1.validators import int_validator
 
 import poidspression
 from poidspression import log
@@ -25,6 +26,7 @@ PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
 LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
 
 DAYS = 30.437 * 2
+
 
 class Pression:
 
@@ -39,21 +41,20 @@ class Pression:
             return df.to_dict('records')
         except (FileNotFoundError, pd.errors.EmptyDataError) as ex1:
             log.error(ex1)
-            pressure_list: list[dict[str, datetime]] = []
-            return pressure_list
+            return []
 
     @staticmethod
-    def save_csv(pressure_list: list[dict[str, datetime]]) -> None:
-        df: pd.DataFrame = pd.DataFrame(pressure_list)
+    def save_csv(_pressure_list: list[dict[str, datetime]]) -> None:
+        df: pd.DataFrame = pd.DataFrame(_pressure_list)
         if os.path.isfile(PATH + 'poids.csv'):
             df.to_csv(f'{PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y/%m/%d %H:%M:%S")
         else:
             log.warn(f'File not found: {PATH}pression.csv')
 
     @staticmethod
-    def display_graph(pressure_list: list[dict[str, datetime]]) -> None:
+    def display_graph(_pressure_list: list[dict[str, datetime]]) -> None:
         fig, ax1 = plt.subplots()
-        df: pd.DataFrame = pd.DataFrame(pressure_list)
+        df: pd.DataFrame = pd.DataFrame(_pressure_list)
 
         mean = df.rolling(window=f'{DAYS}D', on='date')['sys'].mean()
         ax1.plot(df["date"], mean, color='darkgreen')
@@ -122,8 +123,8 @@ class Pression:
             hspace=0.202
         )
         fig.canvas.manager.set_window_title(f'Pression {VERSION}')
-        DPI: float = fig.get_dpi()
-        fig.set_size_inches(1280.0 / float(DPI), 720.0 / float(DPI))
+        dpi: float = fig.get_dpi()
+        fig.set_size_inches(1280.0 / float(dpi), 720.0 / float(dpi))
 
         last_month = datetime.now() - dateutil.relativedelta.relativedelta(days=DAYS)
         mask = df['date'] > last_month
@@ -232,13 +233,13 @@ class Dialog:
         for field in 'Sys', 'Dia', 'Pulse':
             row = tk.Frame(Dialog.ROOT)
             tk.Label(row, width=6, text=field, anchor='w', font=('calibre', 12, 'bold')).pack(side=tk.LEFT)
-            intVar = tk.IntVar(value='')
-            ent = tk.Entry(row, textvariable=intVar, validate='key',
+            int_var = tk.IntVar(value='')
+            ent = tk.Entry(row, textvariable=int_var, validate='key',
                            validatecommand=(Dialog.ROOT.register(self.validate), '%S', '%P'),
                            font=('calibre', 12, 'normal'), width=4)
             row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
             ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
-            entries.append((field, ent, intVar))
+            entries.append((field, ent, int_var))
         return entries
 
     @staticmethod
