@@ -16,7 +16,6 @@ import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import CheckButtons
 from matplotlib.widgets import Slider, Button
-from pydantic.v1.validators import int_validator
 
 import poidspression
 from poidspression import log
