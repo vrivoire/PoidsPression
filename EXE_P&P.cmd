@@ -9,7 +9,5 @@ start pyinstaller -y --onedir  poidspression\Poids.py --icon=poids.ico --nowindo
 @echo -------------------------------------------------
 start pyinstaller -y --onedir  poidspression\Pression.py --icon=pression.png --nowindowed --noconsole --paths=C:\Users\ADELE\Documents\NetBeansProjects\PycharmProjects\PoidsPression;C:\Users\ADELE\Documents\NetBeansProjects\PycharmProjects\PoidsPression\.venv\Lib\site-packages
 @echo -------------------------------------------------
-start pyinstaller -y --onedir  poidspression\Cigs.py --icon=cig.png --nowindowed --noconsole --paths=C:\Users\ADELE\Documents\NetBeansProjects\PycharmProjects\PoidsPression;C:\Users\ADELE\Documents\NetBeansProjects\PycharmProjects\PoidsPression\.venv\Lib\site-packages
-@echo -------------------------------------------------
 
 rem 

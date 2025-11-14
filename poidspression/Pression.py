@@ -22,7 +22,7 @@ from poidspression import log
 
 VERSION = 3
 PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
-LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
+LOCATION = f'{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 DAYS = 30.437 * 2
 
@@ -131,7 +131,8 @@ class Pression:
         log.info(f"x: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}")
         pressure_list[len(pressure_list) - 1]['date'].strftime('%Y/%m/%d %H:%M')
         plt.title(
-            f'Pression (x̄: {int(DAYS)} days, sys: {round(df2['sys'].mean(), 2)}, dia: {round(df2['dia'].mean(), 2)}), sys: {df['sys'][len(df['sys']) - 1]}, dia: {df['dia'][len(df['dia']) - 1]}, pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
+            f'Pression (x̄: {int(DAYS)} days, sys: {round(df2['sys'].mean(), 2)}, dia: {round(df2['dia'].mean(), 2)}), sys: {df['sys'][len(df['sys']) - 1]}, '
+            f'dia: {df['dia'][len(df['dia']) - 1]}, pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
         plt.savefig(PATH + 'pression.png')
 
         def callback_on_clicked(label):
@@ -187,10 +188,8 @@ class Pression:
         button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
         button.on_clicked(callback_reset)
 
-        thismanager = matplotlib.pyplot.get_current_fig_manager()
-        img = PhotoImage(file=f'{LOCATION}pression.png')
-        thismanager.window.tk.call('wm', 'iconphoto', thismanager.window._w, img)
-
+        mng = plt.get_current_fig_manager()
+        mng.window.state('zoomed')
         plt.show()
 
     @staticmethod

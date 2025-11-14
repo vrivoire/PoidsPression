@@ -94,7 +94,8 @@ def display_graph():
     max_kg = df['kg'].max(numeric_only=True)
     min_kg = df['kg'].min(numeric_only=True)
     plt.title(
-        f"Date: {df["date"].tail(1).item().strftime('%Y/%m/%d %H:%M')}, Poids: {df["kg"].tail(1).item()}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean.tail(1).item(), 2)}Kg (rolling x̄: {int(DAYS)} days)")
+        f"Date: {df["date"].tail(1).item().strftime('%Y/%m/%d %H:%M')}, Poids: {df["kg"].tail(1).item()}, min: {round(min_kg, 2)}Kg, max: {round(max_kg, 2)}Kg, "
+        f"Δ: {round(max_kg - min_kg, 2)}Kg, x̄: {round(mean.tail(1).item(), 2)}Kg (rolling x̄: {int(DAYS)} days)")
     max_kg = int(max_kg) + 0.5
     min_kg = int(min_kg) - 0.5
     plt.axis((
@@ -172,10 +173,8 @@ def display_graph():
     button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
     button.on_clicked(callback_reset)
 
-    thismanager = matplotlib.pyplot.get_current_fig_manager()
-    img = PhotoImage(file=f'{LOCATION}poids.png')
-    thismanager.window.tk.call('wm', 'iconphoto', thismanager.window._w, img)
-
+    mng = plt.get_current_fig_manager()
+    mng.window.state('zoomed')
     plt.show()
 
 
