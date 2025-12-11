@@ -5,13 +5,13 @@ import time
 import tkinter as tk
 import traceback
 from datetime import datetime, timedelta
-from tkinter import Entry, IntVar, Tk, PhotoImage
+from tkinter import Entry, IntVar, Tk
 from typing import Any
 
 import dateutil.relativedelta
-import matplotlib
-import matplotlib.dates as mdates
+import matplotlib.dates as m_dates
 import matplotlib.pyplot as plt
+import mplcursors
 import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import CheckButtons
@@ -55,16 +55,31 @@ class Pression:
         fig, ax1 = plt.subplots()
         df: pd.DataFrame = pd.DataFrame(_pressure_list)
 
-        mean = df.rolling(window=f'{DAYS}D', on='date')['sys'].mean()
-        ax1.plot(df["date"], mean, color='darkgreen')
-        mean = df.rolling(window=f'{DAYS}D', on='date')['dia'].mean()
-        ax1.plot(df["date"], mean, color='royalblue')
-        mean = df.rolling(window=f'{DAYS}D', on='date')['pulse'].mean()
-        plt.plot(df["date"], mean, color='gray')
+        mean_sys_plot, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['sys'].mean(), color='darkgreen', label='Mean Sys')
+        mean_dia_plot, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['dia'].mean(), color='royalblue', label='Mean Dia')
+        mean_pulse_plot, = plt.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['pulse'].mean(), color='gray', label='Mean Pulse')
+        sys_plot, = ax1.plot(df["date"], df["sys"], "g", label='Sys')
+        dia_plot, = ax1.plot(df["date"], df["dia"], "b", label='Dia')
+        pulse_plot, = ax1.plot(df["date"], df["pulse"], "k", label='Pulse', visible=False)
 
-        l0, = ax1.plot(df["date"], df["sys"], "g", label='Sys')
-        l1, = ax1.plot(df["date"], df["dia"], "b", label='Dia')
-        l2, = ax1.plot(df["date"], df["pulse"], "k", label='Pulse', visible=False)
+        mplcursors.cursor(mean_sys_plot, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+            f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {round(float(sel[1][1]), 2)} {sel[0].get_label()}'
+        ))
+        mplcursors.cursor(mean_dia_plot, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+            f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {round(float(sel[1][1]), 2)} {sel[0].get_label()}'
+        ))
+        mplcursors.cursor(mean_pulse_plot, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+            f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {round(float(sel[1][1]), 2)} {sel[0].get_label()}'
+        ))
+        mplcursors.cursor(sys_plot, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+            f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {int(float(sel[1][1]))} {sel[0].get_label()}'
+        ))
+        mplcursors.cursor(dia_plot, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+            f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {int(float(sel[1][1]))} {sel[0].get_label()}'
+        ))
+        mplcursors.cursor(pulse_plot, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+            f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {int(float(sel[1][1]))} {sel[0].get_label()}'
+        ))
 
         max_sys: int = int(df['sys'].max(numeric_only=True)) + 1
         min_sys: int = int(df['sys'].min(numeric_only=True)) - 1
@@ -95,9 +110,9 @@ class Pression:
         plt.axhspan(90, 100, color='xkcd:light orange', linestyle='-')
         plt.axhspan(80, 90, color='xkcd:apricot', linestyle='-')
 
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m'))
-        plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        plt.gca().xaxis.set_minor_locator(mdates.DayLocator(interval=7))
+        plt.gca().xaxis.set_major_formatter(m_dates.DateFormatter('%Y/%m'))
+        plt.gca().xaxis.set_major_locator(m_dates.MonthLocator(interval=1))
+        plt.gca().xaxis.set_minor_locator(m_dates.DayLocator(interval=7))
         plt.xticks(rotation=45, ha='right', fontsize='small')
 
         plt.tight_layout()
@@ -140,7 +155,7 @@ class Pression:
             ln.set_visible(not ln.get_visible())
             ln.figure.canvas.draw_idle()
 
-        lines_by_label = {l.get_label(): l for l in [l0, l1, l2]}
+        lines_by_label = {l.get_label(): l for l in [sys_plot, dia_plot, pulse_plot]}
         line_colors = [l.get_color() for l in lines_by_label.values()]
         check = CheckButtons(
             ax=ax.inset_axes((0.0, 0.0, 0.05, 0.1)),

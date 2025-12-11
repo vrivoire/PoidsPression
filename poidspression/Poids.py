@@ -8,11 +8,10 @@ import shutil
 import sys
 import time
 from datetime import datetime, timedelta
-from tkinter import PhotoImage
 
-import matplotlib
-import matplotlib.dates as mdates
+import matplotlib.dates as m_dates
 import matplotlib.pyplot as plt
+import mplcursors
 import numpy as np
 import pandas as pd
 from matplotlib.dates import date2num, num2date
@@ -80,10 +79,16 @@ def add_data(file_name):
 def display_graph():
     fig, ax1 = plt.subplots()
 
-    ax1.plot(df["date"], df["kg"], color="g")
-
+    kg, = ax1.plot(df["date"], df["kg"], color="g", label='Kg')
     mean = df.rolling(window=f'{DAYS}D', on='date')['kg'].mean()
-    ax1.plot(df["date"], mean, color='0.5')
+    mean_kg, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['kg'].mean(), color='0.5', label='Mean kg')
+
+    mplcursors.cursor(kg, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+        f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {round(float(sel[1][1]), 2)} {sel[0].get_label()}'
+    ))
+    mplcursors.cursor(mean_kg, hover=2).connect("add", lambda sel: sel.annotation.set_text(
+        f'{m_dates.num2date(sel.target[0]).strftime('%Y/%m/%d %H:00')}:  {round(float(sel[1][1]), 2)} {sel[0].get_label()}'
+    ))
 
     plt.axvline(datetime(2023, 2, 2))
 
@@ -112,8 +117,8 @@ def display_graph():
     plt.yticks(yticks)
     plt.minorticks_on()
 
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m'))
-    plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+    plt.gca().xaxis.set_major_formatter(m_dates.DateFormatter('%Y/%m'))
+    plt.gca().xaxis.set_major_locator(m_dates.MonthLocator(interval=1))
     plt.xticks(rotation=45, ha='right', fontsize='small')
 
     plt.gcf()
