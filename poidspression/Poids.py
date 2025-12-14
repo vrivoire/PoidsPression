@@ -7,6 +7,7 @@ import os.path
 import shutil
 import sys
 import time
+import tkinter
 from datetime import datetime, timedelta
 
 import matplotlib.dates as m_dates
@@ -131,9 +132,6 @@ def display_graph():
         hspace=0.102
     )
     fig.canvas.manager.set_window_title('Poids')
-    dpi = fig.get_dpi()
-    fig.set_size_inches(1280.0 / float(dpi), 720.0 / float(dpi))
-    plt.savefig(PATH + 'Poids.png')
 
     def callback_update(val):
         slider_position.valtext.set_text(num2date(val).date())
@@ -180,6 +178,15 @@ def display_graph():
 
     mng = plt.get_current_fig_manager()
     mng.window.state('zoomed')
+
+    dpi: float = fig.get_dpi()
+    root = tkinter.Tk()
+    SCREEN_WIDTH: int = root.winfo_screenwidth()
+    SCREEN_HEIGHT: int = root.winfo_screenheight()
+    root.destroy()
+    fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
+    plt.savefig(PATH + 'Poids.png')
+
     plt.show()
 
 
