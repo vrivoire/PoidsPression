@@ -8,6 +8,7 @@ import shutil
 import sys
 import time
 import tkinter
+import traceback
 from datetime import datetime, timedelta
 
 import matplotlib.dates as m_dates
@@ -135,7 +136,8 @@ def display_graph():
 
     def callback_update(val):
         slider_position.valtext.set_text(num2date(val).date())
-        df2 = df.set_index(['date']).loc[num2date(val - DAYS).date():num2date(val).date()]
+        df['date'] = pd.to_datetime(df['date'])
+        df2 = df[df['date'].dt.date.between(num2date(val - DAYS).date(), num2date(val).date())]
         min2 = df2['kg'].min(numeric_only=True) - 0.5
         if np.isnan(min2):
             min2 = df['kg'].min(numeric_only=True) - 0.5
