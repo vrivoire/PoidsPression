@@ -1,16 +1,13 @@
 # Takeout
 # https://takeout.google.com/
 
-import ctypes
-import glob
 import os.path
-import shutil
-import sys
-import time
 import tkinter
-import traceback
 from datetime import datetime, timedelta
 
+import matplotlib
+
+matplotlib.use('TkAgg')
 import matplotlib.dates as m_dates
 import matplotlib.pyplot as plt
 import mplcursors
@@ -22,22 +19,26 @@ from matplotlib.widgets import Slider, Button
 import poidspression
 from poidspression import log
 
-PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
-DL_PATH = "C:/Users/adele/Downloads/"
-CLOUD_PATH = DL_PATH + "Takeout/Fit/All Data/"
-JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
-CSV_FILE = "Renpho Health-R_PmJP0.csv"
-ZIP_FILE = "takeout-*.zip"
+LOCAL_PATH = F'{os.getenv('USERPROFILE')}/Documents/PoidsPression/'
+POIDS_CSV_FILE = 'poids.csv'
+GOOGLE_PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/Mon disque/PoidsPression/"
+GOOGLE_FILE = "Renpho Health-R_PmJP0"
+
+# DL_PATH = F"{os.getenv('USERPROFILE')}/Downloads/"
+# CLOUD_PATH = DL_PATH + "Takeout/Fit/All Data/"
+# JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
+# ZIP_FILE = "takeout-*.zip"
+
 DAYS = 30.437 * 3
 LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
 
 
-def load_csv(file_name):
+def load_csv(file_name: str) -> list:
     log.info(f'Looking for {file_name}')
     if os.path.isfile(file_name):
+        log.info(f'{file_name} found')
         result = pd.read_csv(file_name)
         result = result.rename(columns={'La date': 'date', 'Temps': 'time', 'Poids(kg)': 'kg'})
-        # result = result.rename(columns={'La date': 'date', 'Poids(kg)': 'kg'})
         try:
             result = result.drop(
                 ['Temps', 'IMC', 'Graisse corporelle(%)', 'Muscle squelettique(%)', 'Poids hors masse grasse(kg)',
@@ -58,9 +59,11 @@ def load_csv(file_name):
 
         result = result.astype({'date': 'datetime64[ns]'})
         result = result.astype({'kg': 'float'})
-        return result.to_dict('records')
+        to_dict: list = result.to_dict('records')
+        log.info(f'Found {len(to_dict)} entries in {file_name}')
+        return to_dict
     else:
-        log.info(f'Not found file {file_name}.')
+        log.info(f'Not found file {file_name}')
     return []
 
 
@@ -187,64 +190,54 @@ def display_graph():
     SCREEN_HEIGHT: int = root.winfo_screenheight()
     root.destroy()
     fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
-    plt.savefig(PATH + 'Poids.png')
+    plt.savefig(LOCAL_PATH + 'Poids.png')
 
     plt.show()
+
+
+def get_from_export():
+    pass
+    # zip_list = glob.glob(DL_PATH + ZIP_FILE)
+    # if len(zip_list) > 0:
+    #     log.info("Found zipfile from Takeout: " + zip_list[0])
+    #     shutil.unpack_archive(zip_list[0], DL_PATH)
+    #     os.remove(zip_list[0])
+
+    # if os.path.isfile(CLOUD_PATH + JSON_FILE):
+    #     shutil.copy2(CLOUD_PATH + JSON_FILE, GOOGLE_PATH)
+    #     shutil.rmtree(CLOUD_PATH + '/../..')
+    # cloud_data = []
+    # if os.path.isfile(GOOGLE_PATH + JSON_FILE):
+    #     cloud_data = add_data(GOOGLE_PATH + JSON_FILE)
+    #     os.remove(GOOGLE_PATH + JSON_FILE)
 
 
 if __name__ == "__main__":
     poidspression.set_up(__file__)
 
-    i = 0
-    while not os.path.exists(PATH + 'poids.csv') and i < 5:
-        log.warning(f'The path "{PATH + 'poids.csv'}" not ready.')
-        i += 1
-        time.sleep(10)
-    if not os.path.exists(PATH + 'poids.csv'):
-        ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
-        sys.exit()
+    get_from_export()
 
-    zip_list = glob.glob(DL_PATH + ZIP_FILE)
-    if len(zip_list) > 0:
-        log.info("Found zipfile from Takeout: " + zip_list[0])
-        shutil.unpack_archive(zip_list[0], DL_PATH)
-        os.remove(zip_list[0])
+    google_file = GOOGLE_PATH + GOOGLE_FILE
+    log.info(f"google_file = {google_file}")
 
-    if os.path.isfile(CLOUD_PATH + JSON_FILE):
-        shutil.copy2(CLOUD_PATH + JSON_FILE, PATH)
-        shutil.rmtree(CLOUD_PATH + '/../..')
-    cloud_data = []
-    if os.path.isfile(PATH + JSON_FILE):
-        cloud_data = add_data(PATH + JSON_FILE)
-        os.remove(PATH + JSON_FILE)
+    # if os.path.isfile(DL_PATH + CSV_FILE):
+    #     shutil.copy2(DL_PATH + CSV_FILE, GOOGLE_PATH)
+    #     os.remove(DL_PATH + CSV_FILE)
 
-    csv_file = PATH + CSV_FILE
-    log.info(f"csv_file = {csv_file}")
-    csv_root = csv_file[0: (len(csv_file) - 4)]
-    log.info(f"csv_root = {csv_root}")
+    csv_data1 = load_csv(google_file)
+    if os.path.isfile(google_file):
+        os.remove(google_file)
 
-    if os.path.isfile(csv_root):
-        log.info("Found csv_root")
-        if os.path.isfile(csv_file):
-            os.remove(csv_root + ".csv")
-        os.rename(csv_root, csv_file)
-
-    if os.path.isfile(DL_PATH + CSV_FILE):
-        shutil.copy2(DL_PATH + CSV_FILE, PATH)
-        os.remove(DL_PATH + CSV_FILE)
-
-    csv_data1 = load_csv(PATH + CSV_FILE)
-    if os.path.isfile(PATH + CSV_FILE):
-        os.remove(PATH + CSV_FILE)
-
-    csv_data2 = load_csv(PATH + 'poids.csv')
-    csv_data1.extend(csv_data2)
+    csv_data2 = load_csv(LOCAL_PATH + POIDS_CSV_FILE)
 
     results = []
-    cloud_data.extend(csv_data1)
-    for myDict in cloud_data:
-        if myDict not in results:
-            results.append(myDict)
+    results.extend(csv_data1)
+    results.extend(csv_data2)
+
+    # cloud_data.extend(csv_data1)
+    # for myDict in cloud_data:
+    #     if myDict not in results:
+    #         results.append(myDict)
 
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
@@ -254,11 +247,8 @@ if __name__ == "__main__":
     df = df.drop(df[(df['date'].dt.hour == 0) & (df['date'].dt.minute == 0) & (df['date'].dt.second == 0)].index)
     df = df.drop_duplicates(subset=['kg', 'date'], keep='first')
 
-    if os.path.isfile(PATH + 'poids.csv'):
-        df.to_csv(PATH + 'poids.csv', encoding='utf-8', index=False, float_format='%.2f',
-                  date_format="%Y/%m/%d %H:%M:%S")
-    else:
-        log.warn('File not found: ' + PATH + 'poids.csv')
+    df.to_csv(LOCAL_PATH + POIDS_CSV_FILE, encoding='utf-8', index=False, float_format='%.2f',
+              date_format="%Y/%m/%d %H:%M:%S")
 
     log.info('\n')
     log.info(f'\n{df}')

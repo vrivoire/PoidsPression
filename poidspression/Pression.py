@@ -10,6 +10,9 @@ from tkinter import Entry, IntVar, Tk
 from typing import Any
 
 import dateutil.relativedelta
+import matplotlib
+
+matplotlib.use('TkAgg')
 import matplotlib.dates as m_dates
 import matplotlib.pyplot as plt
 import mplcursors
@@ -22,7 +25,7 @@ import poidspression
 from poidspression import log
 
 VERSION = 3
-PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/PoidsPression/"
+LOCAL_PATH = 'C:/Users/ADELE/Documents/PoidsPression/'
 LOCATION = f'{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 DAYS = 30.437 * 2
@@ -36,7 +39,7 @@ class Pression:
     @staticmethod
     def load_csv() -> list[dict]:
         try:
-            df: pd.DataFrame = pd.read_csv(f'{PATH}pression.csv')
+            df = pd.read_csv(f'{LOCAL_PATH}pression.csv')
             df['date'] = pd.to_datetime(df['date'])
             return df.to_dict('records')
         except (FileNotFoundError, pd.errors.EmptyDataError) as ex1:
@@ -46,19 +49,22 @@ class Pression:
     @staticmethod
     def save_csv(_pressure_list: list[dict[str, datetime]]) -> None:
         df: pd.DataFrame = pd.DataFrame(_pressure_list)
-        if os.path.isfile(PATH + 'poids.csv'):
-            df.to_csv(f'{PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y/%m/%d %H:%M:%S")
+        if os.path.isfile(LOCAL_PATH + 'poids.csv'):
+            df.to_csv(f'{LOCAL_PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y/%m/%d %H:%M:%S")
         else:
-            log.warn(f'File not found: {PATH}pression.csv')
+            log.warn(f'File not found: {LOCAL_PATH}pression.csv')
 
     @staticmethod
     def display_graph(_pressure_list: list[dict[str, datetime]]) -> None:
         fig, ax1 = plt.subplots()
         df: pd.DataFrame = pd.DataFrame(_pressure_list)
 
-        mean_sys_plot, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['sys'].mean(), color='darkgreen', label='Mean Sys')
-        mean_dia_plot, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['dia'].mean(), color='royalblue', label='Mean Dia')
-        mean_pulse_plot, = plt.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['pulse'].mean(), color='gray', label='Mean Pulse')
+        mean_sys_plot, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['sys'].mean(), color='darkgreen',
+                                  label='Mean Sys')
+        mean_dia_plot, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['dia'].mean(), color='royalblue',
+                                  label='Mean Dia')
+        mean_pulse_plot, = plt.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['pulse'].mean(), color='gray',
+                                    label='Mean Pulse')
         sys_plot, = ax1.plot(df["date"], df["sys"], "g", label='Sys')
         dia_plot, = ax1.plot(df["date"], df["dia"], "b", label='Dia')
         pulse_plot, = ax1.plot(df["date"], df["pulse"], "k", label='Pulse', visible=False)
@@ -210,7 +216,7 @@ class Pression:
         SCREEN_HEIGHT: int = root.winfo_screenheight()
         root.destroy()
         fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
-        plt.savefig(PATH + 'Pression.png')
+        plt.savefig(LOCAL_PATH + 'Pression.png')
 
         plt.show()
 
@@ -287,11 +293,11 @@ if __name__ == "__main__":
     poidspression.set_up(__file__)
     try:
         i = 0
-        while not os.path.exists(f'{PATH}pression.csv') and i < 5:
-            log.warning(f'The path "{f'{PATH}pression.csv'}" not ready.')
+        while not os.path.exists(f'{LOCAL_PATH}pression.csv') and i < 5:
+            log.warning(f'The path "{f'{LOCAL_PATH}pression.csv'}" not ready.')
             i += 1
             time.sleep(10)
-        if not os.path.exists(f'{PATH}pression.csv'):
+        if not os.path.exists(f'{LOCAL_PATH}pression.csv'):
             ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
             sys.exit()
 
