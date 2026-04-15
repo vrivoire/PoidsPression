@@ -19,9 +19,11 @@ from matplotlib.widgets import Slider, Button
 import poidspression
 from poidspression import log
 
-LOCAL_PATH = F'{os.getenv('USERPROFILE')}/Documents/PoidsPression/'
+POIDS_PRESSION_PATH = 'PoidsPression'
+LOCAL_PATH = F'{os.getenv('USERPROFILE')}/Documents/{POIDS_PRESSION_PATH}/'
 POIDS_CSV_FILE = 'poids.csv'
-GOOGLE_PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/Mon disque/PoidsPression/"
+
+GOOGLE_PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/Mon disque/{POIDS_PRESSION_PATH}/"
 GOOGLE_FILE = "Renpho Health-R_PmJP0"
 
 # DL_PATH = F"{os.getenv('USERPROFILE')}/Downloads/"
@@ -34,9 +36,10 @@ LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmPro
 
 
 def load_csv(file_name: str) -> list:
-    log.info(f'Looking for {file_name}')
+    log.info(f'Looking file: {file_name}')
+    to_dict: list = []
     if os.path.isfile(file_name):
-        log.info(f'{file_name} found')
+        log.info(f'Found file: {file_name}')
         result = pd.read_csv(file_name)
         result = result.rename(columns={'La date': 'date', 'Temps': 'time', 'Poids(kg)': 'kg'})
         try:
@@ -59,12 +62,12 @@ def load_csv(file_name: str) -> list:
 
         result = result.astype({'date': 'datetime64[ns]'})
         result = result.astype({'kg': 'float'})
-        to_dict: list = result.to_dict('records')
+        to_dict = result.to_dict('records')
         log.info(f'Found {len(to_dict)} entries in {file_name}')
-        return to_dict
     else:
-        log.info(f'Not found file {file_name}')
-    return []
+        log.info(f'File not found: {file_name}')
+
+    return to_dict
 
 
 def add_data(file_name):
@@ -215,40 +218,39 @@ def get_from_export():
 if __name__ == "__main__":
     poidspression.set_up(__file__)
 
-    get_from_export()
-
-    google_file = GOOGLE_PATH + GOOGLE_FILE
-    log.info(f"google_file = {google_file}")
-
     # if os.path.isfile(DL_PATH + CSV_FILE):
     #     shutil.copy2(DL_PATH + CSV_FILE, GOOGLE_PATH)
     #     os.remove(DL_PATH + CSV_FILE)
-
-    csv_data1 = load_csv(google_file)
-    if os.path.isfile(google_file):
-        os.remove(google_file)
-
-    csv_data2 = load_csv(LOCAL_PATH + POIDS_CSV_FILE)
-
-    results = []
-    results.extend(csv_data1)
-    results.extend(csv_data2)
-
+    get_from_export()
     # cloud_data.extend(csv_data1)
     # for myDict in cloud_data:
     #     if myDict not in results:
     #         results.append(myDict)
+
+    results = []
+    google_file = f'{GOOGLE_PATH}{GOOGLE_FILE}'
+    results.extend(load_csv(google_file))
+    if os.path.isfile(google_file):
+        os.remove(google_file)
+
+    google_file = f'{GOOGLE_PATH}../{GOOGLE_FILE}'
+    results.extend(load_csv(google_file))
+    if os.path.isfile(google_file):
+        os.remove(google_file)
+
+    results.extend(load_csv(f'{LOCAL_PATH}{POIDS_CSV_FILE}'))
 
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
     df = df.filter(['kg', 'date'])
     df['kg'] = df['kg'].apply(lambda x: round(x, 2))
 
+    print(f'df size: {len(df)}')
     df = df.drop(df[(df['date'].dt.hour == 0) & (df['date'].dt.minute == 0) & (df['date'].dt.second == 0)].index)
     df = df.drop_duplicates(subset=['kg', 'date'], keep='first')
+    print(f'cleanup df: {len(df)}')
 
-    df.to_csv(LOCAL_PATH + POIDS_CSV_FILE, encoding='utf-8', index=False, float_format='%.2f',
-              date_format="%Y/%m/%d %H:%M:%S")
+    df.to_csv(f'{LOCAL_PATH}{POIDS_CSV_FILE}', encoding='utf-8', index=False, float_format='%.2f', date_format="%Y/%m/%d %H:%M:%S")
 
     log.info('\n')
     log.info(f'\n{df}')
