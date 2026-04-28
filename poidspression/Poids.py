@@ -245,10 +245,10 @@ if __name__ == "__main__":
     df = df.filter(['kg', 'date'])
     df['kg'] = df['kg'].apply(lambda x: round(x, 2))
 
-    print(f'df size: {len(df)}')
+    log.info(f'df size: {len(df)}')
     df = df.drop(df[(df['date'].dt.hour == 0) & (df['date'].dt.minute == 0) & (df['date'].dt.second == 0)].index)
     df = df.drop_duplicates(subset=['kg', 'date'], keep='first')
-    print(f'cleanup df: {len(df)}')
+    log.info(f'cleanup df: {len(df)}')
 
     df.to_csv(f'{LOCAL_PATH}{POIDS_CSV_FILE}', encoding='utf-8', index=False, float_format='%.2f', date_format="%Y/%m/%d %H:%M:%S")
 
