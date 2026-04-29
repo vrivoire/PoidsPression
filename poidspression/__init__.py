@@ -2,6 +2,9 @@ import logging as log
 import logging.handlers
 import os.path
 
+import pandas
+from pandas import DataFrame
+
 HOME_PATH = f"{os.getenv('USERPROFILE')}/"
 LOG_PATH = f"{HOME_PATH}Documents/NetBeansProjects/PycharmProjects/logs/"
 LOG_NAME: str = ''
@@ -50,3 +53,10 @@ def set_up(log_name: str):
             logging.StreamHandler()
         ]
     )
+
+
+def show_df(df: DataFrame, title='', max_columns=None, width=1000, max_rows=50) -> None:
+    pandas.set_option('display.max_columns', max_columns)
+    pandas.set_option('display.width', width)
+    pandas.set_option('display.max_rows', max_rows)
+    log.info(f'>>>> {title} DataFrame len: {len(df)}\n{df[len(df) - max_rows:]}')
