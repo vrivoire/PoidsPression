@@ -43,7 +43,7 @@ class Solde:
         df: DataFrame = self.prepare_data()
         self.display_graph(df)
         print('------------------------------------')
-        df.info()
+        # df.info()
         print('------------------------------------')
         # print(df.describe(include='all'))
         # print('------------------------------------')
@@ -151,6 +151,8 @@ class Solde:
             root.destroy()
             fig.set_size_inches(screen_width / float(dpi), screen_height / float(dpi))
             # plt.savefig(LOCAL_PATH + 'Poids.png')
+
+            poidspression.set_icon('dollar_coin.png')
 
             plt.show()
         except Exception as ex:

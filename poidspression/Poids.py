@@ -195,6 +195,8 @@ def display_graph():
     fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
     plt.savefig(LOCAL_PATH + 'Poids.png')
 
+    # plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file='../poids.png'))
+
     plt.show()
 
 

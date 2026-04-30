@@ -1,8 +1,11 @@
 import logging as log
 import logging.handlers
 import os.path
+import tkinter as tk
+from pathlib import Path
 
 import pandas
+from matplotlib import pyplot as plt
 from pandas import DataFrame
 
 HOME_PATH = f"{os.getenv('USERPROFILE')}/"
@@ -32,6 +35,22 @@ def ppretty(value, tab_char='\t', return_char='\n', indent=0):
         return '(%s)' % (','.join(items) + return_char + tab_char * indent)
     else:
         return repr(value)
+
+
+def set_icon(icon_name: str):
+    path = f'{Path(__file__).parent.parent.resolve()}\\{icon_name}'
+    if os.path.isfile(path):
+        log.info(f'>>>> {path} icon exists')
+        plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path))
+    else:
+        log.error(f'>>>> {path} icon not exists')
+
+    path = f'{Path(__file__).parent.parent.parent.parent.parent.resolve()}\\{icon_name}'
+    if os.path.isfile(path):
+        log.info(f'>>>> {path} icon exists')
+        plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path))
+    else:
+        log.error(f'>>>> {path} icon not exists')
 
 
 def set_up(log_name: str):
