@@ -1,5 +1,6 @@
 import os
 import traceback
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -17,21 +18,31 @@ BKP_FULL_PATH = BKP_PATH + BKP_FILE + EXTENSION
 DL_PATH: str = f"{os.getenv('USERPROFILE')}/Downloads/"
 DL_FILE_PATTERN: str = f"{BKP_FILE}*{EXTENSION}"
 
-COLS: list[str] = ['Date', 'Description', 'Sous-description', 'Type d’opération', 'Montant', 'Solde']
+COLS: dict[str, str] = {
+    'Date': 'datetime64[ns]',
+    'Description': 'str',
+    'Sous-description': 'str',
+    'Type d’opération': 'str',
+    'Montant': 'Float64',
+    'Solde': 'Float64'
+}
 
 
 class Solde:
     def __init__(self):
         pass
 
+    def setup_columns(self, df: DataFrame):
+        df.astype(COLS)
+        df.sort_values(by=list(COLS.keys()), ascending=True, inplace=True)
+
     def load_csv(self, file_name: str = BKP_FULL_PATH) -> DataFrame:
         try:
             if os.path.isfile(file_name):
                 load_csv_df = DataFrame(pd.read_csv(file_name, header=0))
                 if load_csv_df is not None:
-                    load_csv_df = load_csv_df[COLS]
-                    load_csv_df.astype({'Date': 'datetime64[ns]', 'Montant': 'Float64', 'Solde': 'Float64'})
-                    load_csv_df.sort_values(by='Date', ascending=True, inplace=True)
+                    load_csv_df = load_csv_df[list(COLS.keys())]
+                    self.setup_columns(load_csv_df)
                     poidspression.show_df(load_csv_df, title=file_name, max_rows=10)
                     log.info(f'Loaded file: {file_name}, with {len(load_csv_df)} rows')
                     return load_csv_df
@@ -40,9 +51,8 @@ class Solde:
             else:
                 log.warning(f'Could not find file: {file_name}')
 
-            load_csv_df = pd.DataFrame(columns=COLS)
-            load_csv_df.astype({'Date': 'datetime64[ns]', 'Montant': 'Float64', 'Solde': 'Float64'})
-            load_csv_df.sort_values(by='Date', ascending=True, inplace=True)
+            load_csv_df = pd.DataFrame(columns=list(COLS.keys()))
+            self.setup_columns(load_csv_df)
             return load_csv_df
         except Exception as ex:
             log.error(ex)
@@ -53,7 +63,7 @@ class Solde:
         try:
             dicto: dict[str, DataFrame] = {}
             for path in Path(DL_PATH).glob(DL_FILE_PATTERN):
-                df_dict: DataFrame | None = solde.load_csv(path.__str__())
+                df_dict: DataFrame | None = self.load_csv(path.__str__())
                 if df_dict is not None:
                     dicto[path.__str__()] = df_dict
                 else:
@@ -71,7 +81,7 @@ class Solde:
             diff_df = df[df.duplicated(keep='first')]
             log.info(f"Removed Rows: {len(diff_df)}")
 
-            df.drop_duplicates(subset=COLS, keep='first', inplace=True)
+            df.drop_duplicates(subset=list(COLS.keys()), keep='first', inplace=True)
 
             log.info(f'drop_duplicates: removed {len1 - len(df)} rows from {len1}')
             df.set_index('Date')
@@ -83,29 +93,33 @@ class Solde:
 
     def prepare_data(self) -> DataFrame:
         try:
-            df: DataFrame = solde.load_csv()
+            df: DataFrame = self.load_csv()
             if df is not None:
-                df_dict: dict[str, DataFrame] = solde.get_df_dl()
+                df_dict: dict[str, DataFrame] = self.get_df_dl()
                 for path, df_tmp in df_dict.items():
                     df = pd.concat([df_tmp, df], axis=0, ignore_index=True, join='outer')
                     log.info(f'\t\tConcated: {path}, now {len(df)} rows')
-                    df.sort_values(by='Date', ascending=True, inplace=True)
 
-                df = df[COLS]
-                df.astype({'Date': 'datetime64[ns]', 'Montant': 'Float64', 'Solde': 'Float64'})
+                self.setup_columns(df)
                 df = df.set_index('Date')
-                df.sort_values(by=COLS, ascending=True, inplace=True)
 
-                solde.drop_duplicates(df)
+                self.drop_duplicates(df)
 
                 poidspression.show_df(df, title='Result *********', max_rows=10)
 
                 out_file: str = BKP_PATH + BKP_FILE + EXTENSION
-                df.to_csv(out_file, encoding='utf-8', index=True, float_format='%.2f', date_format="%Y/%m/%d %H:%M:%S")
+                df.to_csv(out_file, encoding='utf-8', index=True, float_format='%.2f', date_format="%Y-%m-%d")
+                df.to_csv(out_file + '.zip', index=True, float_format='%.2f', date_format="%Y-%m-%d",
+                          compression={
+                              'method': 'zip',
+                              'compression': zipfile.ZIP_LZMA,
+                              'compresslevel': 9
+                          })
                 log.info(f'Saved {out_file} file')
 
-                for path, df_tmp in df_dict.items():
+                for path in df_dict.keys():
                     log.info(f'\t\tFile {path} deleted')
+                    Path(path).unlink(missing_ok=True)
             else:
                 log.error('df is None')
 
