@@ -22,11 +22,11 @@ from matplotlib.widgets import CheckButtons
 from matplotlib.widgets import Slider, Button
 
 import poidspression
-from poidspression import log
+from poidspression import log, LOCAL_PATH, DOCUMENTS_PATH
 
 VERSION = 3
-LOCAL_PATH = 'C:/Users/ADELE/Documents/PoidsPression/'
-LOCATION = f'{os.getenv('USERPROFILE')}/Documents/NetBeansProjects/PycharmProjects/PoidsPression/'
+
+LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 DAYS = 30.437 * 2
 
@@ -218,7 +218,7 @@ class Pression:
         fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
         plt.savefig(LOCAL_PATH + 'Pression.png')
 
-        # plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=f'{LOCATION}pression.png'))
+        poidspression.set_icon('pression.png')
 
         plt.show()
 
@@ -307,7 +307,6 @@ if __name__ == "__main__":
 
         start_time: float = time.time()
         pressure_list: list[dict]
-        log.info(f'sys.argv: {sys.argv}')
 
         pressure_list = pression.load_csv()
         dialog: Dialog = Dialog(pression)

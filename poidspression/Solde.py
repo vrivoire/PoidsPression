@@ -15,16 +15,20 @@ import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 import poidspression
-from poidspression import log
+from poidspression import log, LOCAL_PATH, DOCUMENTS_PATH
 
 EXTENSION: str = '.csv'
 
-BKP_PATH: str = f"{os.getenv('USERPROFILE')}/Documents/BkpScripts/"
+BKP_PATH: str = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/BkpScripts/"
 BKP_FILE: str = 'forfait_Ultime'
 BKP_FULL_PATH = BKP_PATH + BKP_FILE + EXTENSION
 
 DL_PATH: str = f"{os.getenv('USERPROFILE')}/Downloads/"
 DL_FILE_PATTERN: str = f"{BKP_FILE}*{EXTENSION}"
+
+print(os.path.sep)
+
+# print(ppretty(os.environ.copy()))
 
 COLS: dict[str, str] = {
     'Date': 'datetime64[ns]',
@@ -146,11 +150,11 @@ class Solde:
 
             dpi: float = fig.get_dpi()
             root = tkinter.Tk()
-            screen_width: int = root.winfo_screenwidth()
-            screen_height: int = root.winfo_screenheight()
+            SCREEN_WIDTH: int = root.winfo_screenwidth()
+            SCREEN_HEIGHT: int = root.winfo_screenheight()
             root.destroy()
-            fig.set_size_inches(screen_width / float(dpi), screen_height / float(dpi))
-            # plt.savefig(LOCAL_PATH + 'Poids.png')
+            fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
+            plt.savefig(LOCAL_PATH + 'Poids.png')
 
             poidspression.set_icon('dollar_coin.png')
 

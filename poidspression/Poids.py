@@ -17,10 +17,8 @@ from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 
 import poidspression
-from poidspression import log
+from poidspression import log, LOCAL_PATH, POIDS_PRESSION_PATH, DOCUMENTS_PATH
 
-POIDS_PRESSION_PATH = 'PoidsPression'
-LOCAL_PATH = F'{os.getenv('USERPROFILE')}/Documents/{POIDS_PRESSION_PATH}/'
 POIDS_CSV_FILE = 'poids.csv'
 
 GOOGLE_PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/Mon disque/{POIDS_PRESSION_PATH}/"
@@ -32,7 +30,7 @@ GOOGLE_FILE = "Renpho Health-R_PmJP0"
 # ZIP_FILE = "takeout-*.zip"
 
 DAYS = 30.437 * 3
-LOCATION = f'{os.getenv('USERPROFILE')}\\Documents\\NetBeansProjects\\PycharmProjects\\PoidsPression\\'
+LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 
 def load_csv(file_name: str) -> list:
@@ -195,7 +193,7 @@ def display_graph():
     fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
     plt.savefig(LOCAL_PATH + 'Poids.png')
 
-    # plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file='../poids.png'))
+    poidspression.set_icon('poids.png')
 
     plt.show()
 

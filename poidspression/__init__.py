@@ -1,56 +1,44 @@
+import json
 import logging as log
 import logging.handlers
 import os.path
 import tkinter as tk
+import traceback
 from pathlib import Path
 
 import pandas
 from matplotlib import pyplot as plt
 from pandas import DataFrame
 
-HOME_PATH = f"{os.getenv('USERPROFILE')}/"
-LOG_PATH = f"{HOME_PATH}Documents/NetBeansProjects/PycharmProjects/logs/"
+POIDS_PRESSION_PATH = 'PoidsPression'
+DOCUMENTS_PATH = 'Documents'
+LOCAL_PATH = F'{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/{POIDS_PRESSION_PATH}/'
+LOG_PATH = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/NetBeansProjects/PycharmProjects/logs/"
 LOG_NAME: str = ''
 
 
-def ppretty(value, tab_char='\t', return_char='\n', indent=0):
-    string: str = return_char + tab_char * (indent + 1)
-    if type(value) is dict:
-        items = [
-            string + repr(key) + ': ' + ppretty(value[key], tab_char, return_char, indent + 1)
-            for key in value
-        ]
-        return '{%s}' % (','.join(items) + return_char + tab_char * indent)
-    elif type(value) is list:
-        items = [
-            string + ppretty(item, tab_char, return_char, indent + 1)
-            for item in value
-        ]
-        return '[%s]' % (','.join(items) + return_char + tab_char * indent)
-    elif type(value) is tuple:
-        items = [
-            string + ppretty(item, tab_char, return_char, indent + 1)
-            for item in value
-        ]
-        return '(%s)' % (','.join(items) + return_char + tab_char * indent)
-    else:
-        return repr(value)
+def ppretty(value: object, tab_char: object = '\t', return_char: object = '\n', indent: object = 0) -> str | None:
+    try:
+        return json.dumps(value, indent=4, sort_keys=True, default=str, check_circular=False)
+    except Exception as ex:
+        log.error(ex)
+        log.error(traceback.format_exc())
+    return None
 
 
 def set_icon(icon_name: str):
-    path = f'{Path(__file__).parent.parent.resolve()}\\{icon_name}'
-    if os.path.isfile(path):
-        log.info(f'>>>> {path} icon exists')
-        plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path))
+    path1: str = f'{Path(__file__).parent.parent.resolve()}/{icon_name}'
+    if os.path.isfile(path1):
+        log.info(f'Setting window icon, {path1} icon exists')
+        plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path1))
     else:
-        log.error(f'>>>> {path} icon not exists')
-
-    path = f'{Path(__file__).parent.parent.parent.parent.parent.resolve()}\\{icon_name}'
-    if os.path.isfile(path):
-        log.info(f'>>>> {path} icon exists')
-        plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path))
-    else:
-        log.error(f'>>>> {path} icon not exists')
+        log.info(f'Not setting window icon, {path1} icon not exists')
+        path2: str = f'{Path(__file__).parent.parent.parent.parent.parent.resolve()}/{icon_name}'
+        if os.path.isfile(path2):
+            log.info(f'Setting window icon, {path2} icon exists')
+            plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path2))
+        else:
+            log.info(f'Not setting window icon, {path2} icon not exists')
 
 
 def set_up(log_name: str):
