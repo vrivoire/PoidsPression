@@ -15,11 +15,9 @@ import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 import poidspression
-from poidspression import log, LOCAL_PATH, DOCUMENTS_PATH
+from poidspression import log, POIDS_PRESSION_PATH, BKP_PATH
 
 EXTENSION: str = '.csv'
-
-BKP_PATH: str = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/BkpScripts/"
 BKP_FILE: str = 'forfait_Ultime'
 BKP_FULL_PATH = BKP_PATH + BKP_FILE + EXTENSION
 
@@ -154,7 +152,7 @@ class Solde:
             SCREEN_HEIGHT: int = root.winfo_screenheight()
             root.destroy()
             fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
-            plt.savefig(LOCAL_PATH + 'Poids.png')
+            plt.savefig(POIDS_PRESSION_PATH + 'Poids.png')
 
             poidspression.set_icon('dollar_coin.png')
 
@@ -166,7 +164,7 @@ class Solde:
     def setup_columns(self, df: DataFrame) -> DataFrame:
         df = df.astype(COLS)
         df = df.astype({'Date': 'datetime64[ns]'})
-        df = df.sort_values(by=list(COLS.keys()), ascending=True)
+        df = df.sort_values(by=['Date'], ascending=True)
         df['Date'] = pd.to_datetime(df['Date'])
         df.reset_index(drop=True, inplace=True)
         return df

@@ -10,10 +10,12 @@ import pandas
 from matplotlib import pyplot as plt
 from pandas import DataFrame
 
-POIDS_PRESSION_PATH = 'PoidsPression'
-DOCUMENTS_PATH = 'Documents'
-LOCAL_PATH = F'{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/{POIDS_PRESSION_PATH}/'
-LOG_PATH = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/NetBeansProjects/PycharmProjects/logs/"
+POIDS_PRESSION_FOLDER = 'PoidsPression'
+DOCUMENTS_FOLDER = 'Documents'
+BKP_SCRIPTS_FOLDER = 'BkpScripts'
+POIDS_PRESSION_PATH = F'{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/{POIDS_PRESSION_FOLDER}/'
+LOG_PATH = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/NetBeansProjects/PycharmProjects/logs/"
+BKP_PATH: str = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/{BKP_SCRIPTS_FOLDER}/"
 LOG_NAME: str = ''
 
 

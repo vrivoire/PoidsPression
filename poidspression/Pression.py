@@ -22,11 +22,11 @@ from matplotlib.widgets import CheckButtons
 from matplotlib.widgets import Slider, Button
 
 import poidspression
-from poidspression import log, LOCAL_PATH, DOCUMENTS_PATH
+from poidspression import log, POIDS_PRESSION_PATH, DOCUMENTS_FOLDER
 
 VERSION = 3
 
-LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/NetBeansProjects/PycharmProjects/PoidsPression/'
+LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 DAYS = 30.437 * 2
 
@@ -39,7 +39,7 @@ class Pression:
     @staticmethod
     def load_csv() -> list[dict]:
         try:
-            df = pd.read_csv(f'{LOCAL_PATH}pression.csv')
+            df = pd.read_csv(f'{POIDS_PRESSION_PATH}pression.csv')
             df['date'] = pd.to_datetime(df['date'])
             return df.to_dict('records')
         except (FileNotFoundError, pd.errors.EmptyDataError) as ex1:
@@ -49,10 +49,10 @@ class Pression:
     @staticmethod
     def save_csv(_pressure_list: list[dict[str, datetime]]) -> None:
         df: pd.DataFrame = pd.DataFrame(_pressure_list)
-        if os.path.isfile(LOCAL_PATH + 'poids.csv'):
-            df.to_csv(f'{LOCAL_PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y/%m/%d %H:%M:%S")
+        if os.path.isfile(POIDS_PRESSION_PATH + 'poids.csv'):
+            df.to_csv(f'{POIDS_PRESSION_PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y/%m/%d %H:%M:%S")
         else:
-            log.warn(f'File not found: {LOCAL_PATH}pression.csv')
+            log.warn(f'File not found: {POIDS_PRESSION_PATH}pression.csv')
 
     @staticmethod
     def display_graph(_pressure_list: list[dict[str, datetime]]) -> None:
@@ -216,7 +216,7 @@ class Pression:
         SCREEN_HEIGHT: int = root.winfo_screenheight()
         root.destroy()
         fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
-        plt.savefig(LOCAL_PATH + 'Pression.png')
+        plt.savefig(POIDS_PRESSION_PATH + 'Pression.png')
 
         poidspression.set_icon('pression.png')
 
@@ -295,11 +295,11 @@ if __name__ == "__main__":
     poidspression.set_up(__file__)
     try:
         i = 0
-        while not os.path.exists(f'{LOCAL_PATH}pression.csv') and i < 5:
-            log.warning(f'The path "{f'{LOCAL_PATH}pression.csv'}" not ready.')
+        while not os.path.exists(f'{POIDS_PRESSION_PATH}pression.csv') and i < 5:
+            log.warning(f'The path "{f'{POIDS_PRESSION_PATH}pression.csv'}" not ready.')
             i += 1
             time.sleep(10)
-        if not os.path.exists(f'{LOCAL_PATH}pression.csv'):
+        if not os.path.exists(f'{POIDS_PRESSION_PATH}pression.csv'):
             ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
             sys.exit()
 

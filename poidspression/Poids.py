@@ -17,11 +17,11 @@ from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 
 import poidspression
-from poidspression import log, LOCAL_PATH, POIDS_PRESSION_PATH, DOCUMENTS_PATH
+from poidspression import log, POIDS_PRESSION_PATH, POIDS_PRESSION_FOLDER, DOCUMENTS_FOLDER
 
 POIDS_CSV_FILE = 'poids.csv'
 
-GOOGLE_PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/Mon disque/{POIDS_PRESSION_PATH}/"
+GOOGLE_PATH = f"{os.getenv('USERPROFILE')}/GoogleDrive/Mon disque/{POIDS_PRESSION_FOLDER}/"
 GOOGLE_FILE = "Renpho Health-R_PmJP0"
 
 # DL_PATH = F"{os.getenv('USERPROFILE')}/Downloads/"
@@ -30,7 +30,7 @@ GOOGLE_FILE = "Renpho Health-R_PmJP0"
 # ZIP_FILE = "takeout-*.zip"
 
 DAYS = 30.437 * 3
-LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_PATH}/NetBeansProjects/PycharmProjects/PoidsPression/'
+LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 
 def load_csv(file_name: str) -> list:
@@ -191,7 +191,7 @@ def display_graph():
     SCREEN_HEIGHT: int = root.winfo_screenheight()
     root.destroy()
     fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
-    plt.savefig(LOCAL_PATH + 'Poids.png')
+    plt.savefig(POIDS_PRESSION_PATH + 'Poids.png')
 
     poidspression.set_icon('poids.png')
 
@@ -238,7 +238,7 @@ if __name__ == "__main__":
     if os.path.isfile(google_file):
         os.remove(google_file)
 
-    results.extend(load_csv(f'{LOCAL_PATH}{POIDS_CSV_FILE}'))
+    results.extend(load_csv(f'{POIDS_PRESSION_PATH}{POIDS_CSV_FILE}'))
 
     sortedDatas = sorted(results, key=lambda d: d["date"])
     df = pd.DataFrame(sortedDatas)
@@ -250,7 +250,7 @@ if __name__ == "__main__":
     df = df.drop_duplicates(subset=['kg', 'date'], keep='first')
     log.info(f'cleanup df: {len(df)}')
 
-    df.to_csv(f'{LOCAL_PATH}{POIDS_CSV_FILE}', encoding='utf-8', index=False, float_format='%.2f', date_format="%Y/%m/%d %H:%M:%S")
+    df.to_csv(f'{POIDS_PRESSION_PATH}{POIDS_CSV_FILE}', encoding='utf-8', index=False, float_format='%.2f', date_format="%Y/%m/%d %H:%M:%S")
 
     log.info('\n')
     log.info(f'\n{df}')
