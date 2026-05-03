@@ -1,7 +1,6 @@
 import os
 import tkinter
 import traceback
-import zipfile
 from pathlib import Path
 
 import matplotlib
@@ -149,7 +148,7 @@ class Solde:
             )
             slider_position.valtext.set_text(df["Date"][0].date())
             slider_position.on_changed(callback_update)
-            
+
             button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
             button.on_clicked(callback_reset)
 
@@ -181,34 +180,11 @@ class Solde:
         df.reset_index(drop=True, inplace=True)
         return df
 
-    def load_csv(self, file_name: str = BKP_FULL_PATH) -> DataFrame:
-        try:
-            if os.path.isfile(file_name):
-                load_csv_df = DataFrame(pd.read_csv(file_name, header=0))
-                if load_csv_df is not None:
-                    load_csv_df = load_csv_df[list(COLS.keys())]
-                    load_csv_df = self.setup_columns(load_csv_df)
-                    poidspression.show_df(load_csv_df, title=f'load_csv: {file_name}', max_rows=10)
-                    log.info(f'Loaded file: {file_name}, with {len(load_csv_df)} rows')
-                    return load_csv_df
-                else:
-                    log.warning(f'Could not load file: {file_name}')
-            else:
-                log.warning(f'Could not find file: {file_name}')
-
-            load_csv_df = pd.DataFrame(columns=list(COLS.keys()))
-            load_csv_df = self.setup_columns(load_csv_df)
-            return load_csv_df
-        except Exception as ex:
-            log.error(ex)
-            log.error(traceback.format_exc())
-            raise ex
-
     def get_df_from_dl(self) -> dict[str, DataFrame]:
         try:
             dicto: dict[str, DataFrame] = {}
             for path in Path(DL_PATH).glob(DL_FILE_PATTERN):
-                df_dict: DataFrame | None = self.load_csv(path.__str__())
+                df_dict: DataFrame | None = poidspression.load_csv(path.__str__(), list(COLS.keys()))
                 if df_dict is not None:
                     dicto[path.__str__()] = df_dict
                 else:
@@ -231,11 +207,12 @@ class Solde:
 
     def prepare_data(self) -> DataFrame:
         try:
-            df: DataFrame = self.load_csv()
+            df: DataFrame = poidspression.load_csv(BKP_FULL_PATH, list(COLS.keys()))
             if df is not None:
                 df_dict: dict[str, DataFrame] = self.get_df_from_dl()
                 for path, df_tmp in df_dict.items():
                     df = pd.concat([df_tmp, df], axis=0, ignore_index=True, join='outer')
+                    df = self.setup_columns(df)
                     log.info(f'Concated: {path}, now {len(df)} rows')
 
                 self.drop_duplicates(df)
@@ -244,14 +221,7 @@ class Solde:
                 df.reset_index(drop=True, inplace=True)
                 poidspression.show_df(df, title='Result:', max_rows=10)
 
-                df.to_csv(BKP_FULL_PATH, encoding='utf-8', index=True, float_format='%.2f', date_format="%Y-%m-%d")
-                df.to_csv(BKP_FULL_PATH + '.zip', index=True, float_format='%.2f', date_format="%Y-%m-%d",
-                          compression={
-                              'method': 'zip',
-                              'compression': zipfile.ZIP_LZMA,
-                              'compresslevel': 9
-                          })
-                log.info(f'Saved {BKP_FULL_PATH} & zip files')
+                poidspression.save_csv(df, BKP_FULL_PATH)
 
                 for path in df_dict.keys():
                     log.info(f'File {path} deleted')

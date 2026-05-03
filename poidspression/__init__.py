@@ -4,9 +4,11 @@ import logging.handlers
 import os.path
 import tkinter as tk
 import traceback
+import zipfile
 from pathlib import Path
 
 import pandas
+import pandas as pd
 from matplotlib import pyplot as plt
 from pandas import DataFrame
 
@@ -19,6 +21,50 @@ POIDS_PRESSION_PATH = F'{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/{POIDS_PRE
 LOG_PATH = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/NetBeansProjects/PycharmProjects/logs/"
 BKP_PATH: str = f"{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/{BKP_SCRIPTS_FOLDER}/"
 LOG_NAME: str = ''
+
+
+def load_csv(file_name: str, cols: list[str]) -> DataFrame:
+    try:
+        if os.path.isfile(file_name):
+            df = DataFrame(pd.read_csv(file_name, header=0))
+            if df is not None:
+                df = df[cols]
+                show_df(df, title=f'load_csv: {file_name}', max_rows=10)
+                log.info(f'Loaded file: {file_name}, with {len(df)} rows')
+                return df
+            else:
+                log.warning(f'Could not load file: {file_name}')
+        else:
+            log.warning(f'Could not find file: {file_name}')
+
+        df = pd.DataFrame(columns=cols)
+        return df
+    except Exception as ex:
+        log.error(f'file_name: {file_name}, cols: {cols}, {ex}')
+        log.error(traceback.format_exc())
+        raise ex
+
+
+def save_csv(df: DataFrame, file_name: str, date_format: str = "%Y-%m-%d"):
+    if (
+            df is not None
+            and not df.empty
+            and df is not None
+            and os.path.isfile(file_name)
+    ):
+        df.to_csv(file_name, encoding='utf-8', index=True, float_format='%.2f', date_format=date_format)
+        original: float = os.path.getsize(file_name) / 1024
+        df.to_csv(file_name + '.zip', encoding='utf-8', index=True, float_format='%.2f', date_format=date_format,
+                  compression={
+                      'method': 'zip',
+                      'compression': zipfile.ZIP_LZMA,
+                      'compresslevel': 9
+                  })
+        compressed: float = os.path.getsize(file_name + '.zip') / 1024
+        log.info(f"Zipped files, original: {original:,.2f} Ko, compressed: {compressed:,.2f} Ko. ratio: {round(100 - (compressed / original) * 100, 2)}%")
+        log.info(f'Saved {file_name} & zip files')
+    else:
+        raise Exception(f'Could not save file: {file_name}')
 
 
 def ppretty(value: object, tab_char: object = '\t', return_char: object = '\n', indent: object = 0) -> str | None:

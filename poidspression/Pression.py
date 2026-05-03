@@ -5,12 +5,13 @@ import time
 import tkinter
 import tkinter as tk
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 from tkinter import Entry, IntVar, Tk
 from typing import Any
 
 import dateutil.relativedelta
 import matplotlib
+from pandas import DataFrame
 
 matplotlib.use('TkAgg')
 import matplotlib.dates as m_dates
@@ -35,27 +36,8 @@ class Pression:
         log.info('Starting')
 
     @staticmethod
-    def load_csv() -> list[dict]:
-        try:
-            df = pd.read_csv(f'{POIDS_PRESSION_PATH}pression.csv')
-            df['date'] = pd.to_datetime(df['date'])
-            return df.to_dict('records')
-        except (FileNotFoundError, pd.errors.EmptyDataError) as ex1:
-            log.error(ex1)
-            return []
-
-    @staticmethod
-    def save_csv(_pressure_list: list[dict[str, datetime]]) -> None:
-        df: pd.DataFrame = pd.DataFrame(_pressure_list)
-        if os.path.isfile(POIDS_PRESSION_PATH + 'poids.csv'):
-            df.to_csv(f'{POIDS_PRESSION_PATH}pression.csv', encoding='utf-8', index=False, date_format="%Y/%m/%d %H:%M:%S")
-        else:
-            log.warn(f'File not found: {POIDS_PRESSION_PATH}pression.csv')
-
-    @staticmethod
-    def display_graph(_pressure_list: list[dict[str, datetime]]) -> None:
+    def display_graph(df: pd.DataFrame) -> None:
         fig, ax1 = plt.subplots()
-        df: pd.DataFrame = pd.DataFrame(_pressure_list)
 
         mean_sys_plot, = ax1.plot(df["date"], df.rolling(window=f'{DAYS}D', on='date')['sys'].mean(), color='darkgreen',
                                   label='Mean Sys')
@@ -128,8 +110,8 @@ class Pression:
 
         ax: plt.axes.Axes = plt.gca()
         ax.set_xlim(
-            pressure_list[0]['date'] - timedelta(days=10),
-            pressure_list[len(pressure_list) - 1]['date'] + timedelta(days=10)
+            date2num(df["date"].head(1).item()),
+            date2num(df['date'].tail(1).item())
         )
 
         fig: plt.axes.Figure = plt.gcf()
@@ -147,7 +129,7 @@ class Pression:
         mask = df['date'] > last_month
         df2 = df.loc[mask]
         log.info(f"x: {int(DAYS)} days, sys: {int(df2['sys'].mean())}, dia: {int(df2['dia'].mean())}")
-        pressure_list[len(pressure_list) - 1]['date'].strftime('%Y/%m/%d %H:%M')
+
         plt.title(
             f'Pression (x̄: {int(DAYS)} days, sys: {round(df2['sys'].mean(), 2)}, dia: {round(df2['dia'].mean(), 2)}), sys: {df['sys'][len(df['sys']) - 1]}, '
             f'dia: {df['dia'][len(df['dia']) - 1]}, pulse: {df['pulse'][len(df['pulse']) - 1]}, Date: {df['date'][len(df['date']) - 1].strftime('%Y/%m/%d %H:%M')}')
@@ -171,24 +153,22 @@ class Pression:
 
         def callback_update(val):
             slider_position.valtext.set_text(num2date(val).date())
-            window = [
+            ax1.axis((
                 val - DAYS,
                 val + 1,
                 minimum,
                 maximum
-            ]
-            ax1.axis(window)
+            ))
             fig.canvas.draw_idle()
 
         def callback_reset(event):
             slider_position.reset()
-            window = [
+            ax1.axis((
                 date2num(df["date"][0]),
                 date2num(df['date'][len(df['date']) - 1]),
                 minimum,
                 maximum
-            ]
-            ax1.axis(window)
+            ))
             fig.canvas.draw_idle()
 
         slider_position = Slider(
@@ -210,38 +190,59 @@ class Pression:
 
         dpi: float = fig.get_dpi()
         root = tkinter.Tk()
-        SCREEN_WIDTH: int = root.winfo_screenwidth()
-        SCREEN_HEIGHT: int = root.winfo_screenheight()
+        screen_width: int = root.winfo_screenwidth()
+        screen_height: int = root.winfo_screenheight()
         root.destroy()
-        fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
+        fig.set_size_inches(screen_width / float(dpi), screen_height / float(dpi))
         plt.savefig(POIDS_PRESSION_PATH + 'Pression.png')
 
         poidspression.set_icon('pression.png')
 
         plt.show()
 
-    @staticmethod
-    def add_line(line: dict) -> None:
-        pressure_list.append(line)
+    def start(self):
+        try:
+            i = 0
+            while not os.path.exists(f'{POIDS_PRESSION_PATH}pression.csv') and i < 5:
+                log.warning(f'The path "{f'{POIDS_PRESSION_PATH}pression.csv'}" not ready.')
+                i += 1
+                time.sleep(10)
+            if not os.path.exists(f'{POIDS_PRESSION_PATH}pression.csv'):
+                ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
+                sys.exit()
+
+            start_time: float = time.time()
+
+            df = poidspression.load_csv(f'{POIDS_PRESSION_PATH}pression.csv', ['sys', 'dia', 'pulse', 'date'])
+            df = df.astype({'date': 'datetime64[ns]'})
+            Dialog(df)
+            poidspression.show_df(df)
+            poidspression.save_csv(df, f'{POIDS_PRESSION_PATH}pression.csv', date_format="%Y/%m/%d %H:%M:%S")
+            pression.display_graph(df)
+
+            log.info("--- %s seconds ---" % (time.time() - start_time))
+
+        except Exception as ex:
+            log.error(ex)
+            log.error(traceback.format_exc())
 
 
 class Dialog:
     ROOT: Tk = tk.Tk()
 
-    def __init__(self, pression: Pression) -> None:
+    def __init__(self, df: DataFrame) -> None:
         Dialog.ROOT.eval('tk::PlaceWindow . center')
         Dialog.ROOT.title(f"Pression {VERSION}")
         Dialog.ROOT.resizable(False, False)
 
         row = tk.Frame(Dialog.ROOT)
-        tk.Label(row, width=20, text=f"Pression v{VERSION}", anchor='center', font=('calibre', 12, 'bold')).pack(
-            side=tk.LEFT)
+        tk.Label(row, width=20, text=f"Pression v{VERSION}", anchor='center', font=('calibre', 12, 'bold')).pack(side=tk.LEFT)
         row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
 
         entries: list[tuple[Any, Entry, IntVar]] = self.make_form()
 
-        Dialog.ROOT.bind('<Return>', lambda event: self.submit(entries))
-        tk.Button(text='Show', width=20, command=lambda: self.submit(entries)).pack(padx=5, pady=5)
+        Dialog.ROOT.bind('<Return>', lambda event: self.submit(entries, df))
+        tk.Button(text='Show', width=20, command=lambda: self.submit(entries, df)).pack(padx=5, pady=5)
 
         entries[0][1].focus()
 
@@ -269,7 +270,7 @@ class Dialog:
         return entries
 
     @staticmethod
-    def submit(entries: list[tuple[Any, Entry, IntVar]]) -> None:
+    def submit(entries: list[tuple[Any, Entry, IntVar]], df: DataFrame) -> None:
         error: bool = False
         line: dict = {}
         for entry in entries:
@@ -281,9 +282,11 @@ class Dialog:
             except tk.TclError as ex1:
                 error = True
                 log.error(f'{field}: {ex1}')
+
         if not error:
             line['date'] = datetime.now()
-            pression.add_line(line)
+            df.loc[len(df)] = line
+            log.info(f'New line append: {line}')
             Dialog.ROOT.destroy()
         elif entries[0][1].get() == '' and entries[1][1].get() == '' and entries[2][1].get() == '':
             Dialog.ROOT.destroy()
@@ -291,29 +294,5 @@ class Dialog:
 
 if __name__ == "__main__":
     poidspression.set_up(__file__)
-    try:
-        i = 0
-        while not os.path.exists(f'{POIDS_PRESSION_PATH}pression.csv') and i < 5:
-            log.warning(f'The path "{f'{POIDS_PRESSION_PATH}pression.csv'}" not ready.')
-            i += 1
-            time.sleep(10)
-        if not os.path.exists(f'{POIDS_PRESSION_PATH}pression.csv'):
-            ctypes.windll.user32.MessageBoxW(0, "Mapping not ready.", "Warning!", 16)
-            sys.exit()
-
-        pression: Pression = Pression()
-
-        start_time: float = time.time()
-        pressure_list: list[dict]
-
-        pressure_list = pression.load_csv()
-        dialog: Dialog = Dialog(pression)
-
-        log.info(f"\n{pd.DataFrame(pressure_list)}")
-        pression.save_csv(pressure_list)
-        pression.display_graph(pressure_list)
-        log.info("--- %s seconds ---" % (time.time() - start_time))
-    # c = 5/ 0
-    except Exception as ex:
-        log.error(ex)
-        log.error(traceback.format_exc())
+    pression: Pression = Pression()
+    pression.start()

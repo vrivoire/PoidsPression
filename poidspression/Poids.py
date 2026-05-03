@@ -6,6 +6,7 @@ import tkinter
 from datetime import datetime, timedelta
 
 import matplotlib
+from pandas import DataFrame
 
 matplotlib.use('TkAgg')
 import matplotlib.dates as m_dates
@@ -32,53 +33,39 @@ GOOGLE_FILE = "Renpho Health-R_PmJP0"
 LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 
-def load_csv(file_name: str) -> list:
+def load_csv(file_name: str) -> DataFrame:
     log.info(f'Looking file: {file_name}')
-    to_dict: list = []
     if os.path.isfile(file_name):
         log.info(f'Found file: {file_name}')
-        result = pd.read_csv(file_name)
-        result = result.rename(columns={'La date': 'date', 'Temps': 'time', 'Poids(kg)': 'kg'})
+        df: DataFrame = poidspression.load_csv(file_name, cols=['La date', 'Temps', 'Poids(kg)'])
+        df = df.rename(columns={'La date': 'date', 'Temps': 'time', 'Poids(kg)': 'kg'})
         try:
-            result = result.drop(
-                ['Temps', 'IMC', 'Graisse corporelle(%)', 'Muscle squelettique(%)', 'Poids hors masse grasse(kg)',
-                 'Gras sous-cutané(%)', 'Graisse viscérale', 'Eau Corporelle Totale(%)', 'Masse musculaire(kg)',
-                 'Masse osseuse(kg)',
-                 'Protéines(%)', 'Métabolisme de base(kcal)', 'Âge métabolique', 'Poids optimal(kg)',
-                 'Objectif de poids optimal(kg)', 'Objectif masse grasse optimale(kg)',
-                 'Objectif de masse musculaire optimale(kg)', 'Type de corps', 'Remarques'],
-                axis=1)
+            df['date'] = pd.to_datetime(df['date'] + ' ' + df['time'], format="%Y.%m.%d %H:%M:%S")
+            df = df.drop(['time'], axis=1)
         except KeyError:
             pass
 
-        try:
-            result['date'] = pd.to_datetime(result['date'] + ' ' + result['time'], format="%Y.%m.%d %H:%M:%S")
-            result = result.drop(['time'], axis=1)
-        except KeyError:
-            pass
-
-        result = result.astype({'date': 'datetime64[ns]'})
-        result = result.astype({'kg': 'float'})
-        to_dict = result.to_dict('records')
-        log.info(f'Found {len(to_dict)} entries in {file_name}')
+        df = df.astype({'date': 'datetime64[ns]'})
+        df = df.astype({'kg': 'float'})
+        return df
     else:
         log.info(f'File not found: {file_name}')
 
-    return to_dict
+    return DataFrame()
 
 
-def add_data(file_name):
-    log.info(f'Looking for {file_name}')
-    data = []
-    result = pd.read_json(file_name)
-    for dataPoint in result["Data Points"]:
-        kg = float(dataPoint["fitValue"][0]["value"]["fpVal"])
-        ndate = pd.to_datetime(
-            int(dataPoint["endTimeNanos"]) / 1000000, utc=False, unit="ms"
-        )
-        if ndate.year >= 2021:
-            data.append({"kg": kg, "date": ndate})
-    return data
+# def add_data(file_name):
+#     log.info(f'Looking for {file_name}')
+#     data = []
+#     result = pd.read_json(file_name)
+#     for dataPoint in result["Data Points"]:
+#         kg = float(dataPoint["fitValue"][0]["value"]["fpVal"])
+#         ndate = pd.to_datetime(
+#             int(dataPoint["endTimeNanos"]) / 1000000, utc=False, unit="ms"
+#         )
+#         if ndate.year >= 2021:
+#             data.append({"kg": kg, "date": ndate})
+#     return data
 
 
 def display_graph():
@@ -186,10 +173,10 @@ def display_graph():
 
     dpi: float = fig.get_dpi()
     root = tkinter.Tk()
-    SCREEN_WIDTH: int = root.winfo_screenwidth()
-    SCREEN_HEIGHT: int = root.winfo_screenheight()
+    screen_width: int = root.winfo_screenwidth()
+    screen_height: int = root.winfo_screenheight()
     root.destroy()
-    fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
+    fig.set_size_inches(screen_width / float(dpi), screen_height / float(dpi))
     plt.savefig(POIDS_PRESSION_PATH + 'Poids.png')
 
     poidspression.set_icon('poids.png')
@@ -197,21 +184,20 @@ def display_graph():
     plt.show()
 
 
-def get_from_export():
-    pass
-    # zip_list = glob.glob(DL_PATH + ZIP_FILE)
-    # if len(zip_list) > 0:
-    #     log.info("Found zipfile from Takeout: " + zip_list[0])
-    #     shutil.unpack_archive(zip_list[0], DL_PATH)
-    #     os.remove(zip_list[0])
+# def get_from_export():
+# zip_list = glob.glob(DL_PATH + ZIP_FILE)
+# if len(zip_list) > 0:
+#     log.info("Found zipfile from Takeout: " + zip_list[0])
+#     shutil.unpack_archive(zip_list[0], DL_PATH)
+#     os.remove(zip_list[0])
 
-    # if os.path.isfile(CLOUD_PATH + JSON_FILE):
-    #     shutil.copy2(CLOUD_PATH + JSON_FILE, GOOGLE_PATH)
-    #     shutil.rmtree(CLOUD_PATH + '/../..')
-    # cloud_data = []
-    # if os.path.isfile(GOOGLE_PATH + JSON_FILE):
-    #     cloud_data = add_data(GOOGLE_PATH + JSON_FILE)
-    #     os.remove(GOOGLE_PATH + JSON_FILE)
+# if os.path.isfile(CLOUD_PATH + JSON_FILE):
+#     shutil.copy2(CLOUD_PATH + JSON_FILE, GOOGLE_PATH)
+#     shutil.rmtree(CLOUD_PATH + '/../..')
+# cloud_data = []
+# if os.path.isfile(GOOGLE_PATH + JSON_FILE):
+#     cloud_data = add_data(GOOGLE_PATH + JSON_FILE)
+#     os.remove(GOOGLE_PATH + JSON_FILE)
 
 
 if __name__ == "__main__":
@@ -220,36 +206,35 @@ if __name__ == "__main__":
     # if os.path.isfile(DL_PATH + CSV_FILE):
     #     shutil.copy2(DL_PATH + CSV_FILE, GOOGLE_PATH)
     #     os.remove(DL_PATH + CSV_FILE)
-    get_from_export()
+    # get_from_export()
     # cloud_data.extend(csv_data1)
     # for myDict in cloud_data:
     #     if myDict not in results:
     #         results.append(myDict)
 
-    results = []
-    google_file = f'{GOOGLE_PATH}{GOOGLE_FILE}'
-    results.extend(load_csv(google_file))
+    df: DataFrame = DataFrame()
+    google_file: str = f'{GOOGLE_PATH}{GOOGLE_FILE}'
+    df = pd.concat([load_csv(google_file), df], axis=0, ignore_index=True, join='outer')
     if os.path.isfile(google_file):
         os.remove(google_file)
 
-    google_file = f'{GOOGLE_PATH}../{GOOGLE_FILE}'
-    results.extend(load_csv(google_file))
+    google_file: str = f'{GOOGLE_PATH}../{GOOGLE_FILE}'
+    df = pd.concat([load_csv(google_file), df], axis=0, ignore_index=True, join='outer')
     if os.path.isfile(google_file):
         os.remove(google_file)
 
-    results.extend(load_csv(f'{POIDS_PRESSION_PATH}{POIDS_CSV_FILE}'))
+    toto = poidspression.load_csv(f'{POIDS_PRESSION_PATH}{POIDS_CSV_FILE}', ['kg', 'date'])
+    df = pd.concat([toto, df], axis=0, ignore_index=True, join='outer')
 
-    sortedDatas = sorted(results, key=lambda d: d["date"])
-    df = pd.DataFrame(sortedDatas)
-    df = df.filter(['kg', 'date'])
-    df['kg'] = df['kg'].apply(lambda x: round(x, 2))
+    df = df.astype({'date': 'datetime64[ns]', 'kg': 'float'})
+    df = df.sort_values(by=['date'], ascending=True)
+    df.reset_index(drop=True, inplace=True)
 
     log.info(f'df size: {len(df)}')
-    df = df.drop(df[(df['date'].dt.hour == 0) & (df['date'].dt.minute == 0) & (df['date'].dt.second == 0)].index)
     df = df.drop_duplicates(subset=['kg', 'date'], keep='first')
     log.info(f'cleanup df: {len(df)}')
 
-    df.to_csv(f'{POIDS_PRESSION_PATH}{POIDS_CSV_FILE}', encoding='utf-8', index=False, float_format='%.2f', date_format="%Y/%m/%d %H:%M:%S")
+    poidspression.save_csv(df, f'{POIDS_PRESSION_PATH}{POIDS_CSV_FILE}', date_format='%Y/%m/%d %H:%M:%S')
 
     log.info('\n')
     log.info(f'\n{df}')
