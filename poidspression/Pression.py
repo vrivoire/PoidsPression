@@ -22,13 +22,11 @@ from matplotlib.widgets import CheckButtons
 from matplotlib.widgets import Slider, Button
 
 import poidspression
-from poidspression import log, POIDS_PRESSION_PATH, DOCUMENTS_FOLDER
+from poidspression import log, POIDS_PRESSION_PATH, DOCUMENTS_FOLDER, DAYS
 
 VERSION = 3
 
 LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/NetBeansProjects/PycharmProjects/PoidsPression/'
-
-DAYS = 30.437 * 2
 
 
 class Pression:

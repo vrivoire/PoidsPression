@@ -15,18 +15,14 @@ import pandas as pd
 from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 import poidspression
-from poidspression import log, POIDS_PRESSION_PATH, BKP_PATH
+from poidspression import log, POIDS_PRESSION_PATH, DAYS
 
-EXTENSION: str = '.csv'
+FILE_EXTENSION: str = '.csv'
 BKP_FILE: str = 'forfait_Ultime'
-BKP_FULL_PATH = BKP_PATH + BKP_FILE + EXTENSION
+BKP_FULL_PATH = POIDS_PRESSION_PATH + BKP_FILE + FILE_EXTENSION
 
 DL_PATH: str = f"{os.getenv('USERPROFILE')}/Downloads/"
-DL_FILE_PATTERN: str = f"{BKP_FILE}*{EXTENSION}"
-
-print(os.path.sep)
-
-# print(ppretty(os.environ.copy()))
+DL_FILE_PATTERN: str = f"{BKP_FILE}*{FILE_EXTENSION}"
 
 COLS: dict[str, str] = {
     'Date': 'datetime64[ns]',
@@ -37,19 +33,34 @@ COLS: dict[str, str] = {
     'Solde': 'Float64'
 }
 
-DAYS = 30.437 * 3
-
 
 class Solde:
     def __init__(self):
         df: DataFrame = self.prepare_data()
         self.display_graph(df)
-        print('------------------------------------')
-        # df.info()
-        print('------------------------------------')
+
+        # df_in.to_json(SENSORS_OUTPUT_JSON_FILE, orient='records', indent=4, date_format='iso',
+        #               compression={
+        #                   'method': 'zip',
+        #                   'compression': zipfile.ZIP_LZMA,
+        #                   'compresslevel': 9
+        #               })
+
+        # https://pypi.org/project/tabulate/
+        # >>> print(tabulate([[0.12345, 0.12345, 0.12345]], floatfmt=(".1f", ".3f")))
+        # ---  -----  -------
+        # 0.1  0.123  0.12345
+        # print(df.to_markdown())
+        # print('------------------------------------')
+
+        # print('------------------------------------')
         # print(df.describe(include='all'))
         # print('------------------------------------')
         # print(df.shape)
+        # print('------------------------------------')
+        # df.info()
+        # print('------------------------------------')
+        # print(poidspression.ppretty(os.environ.copy()))
 
     def display_graph(self, df: DataFrame):
         try:
@@ -130,7 +141,7 @@ class Solde:
             slider_position = Slider(
                 plt.axes((0.08, 0.01, 0.73, 0.03), facecolor='White'),
                 'Date',
-                date2num(df["Date"][0]),
+                date2num(df["Date"].head(1).item()),
                 date2num(df['Date'].tail(1).item()),
                 valstep=1,
                 color='w',
@@ -138,6 +149,7 @@ class Solde:
             )
             slider_position.valtext.set_text(df["Date"][0].date())
             slider_position.on_changed(callback_update)
+            
             button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
             button.on_clicked(callback_reset)
 
@@ -164,7 +176,7 @@ class Solde:
     def setup_columns(self, df: DataFrame) -> DataFrame:
         df = df.astype(COLS)
         df = df.astype({'Date': 'datetime64[ns]'})
-        df = df.sort_values(by=['Date'], ascending=True)
+        # df = df.sort_values(by=['Date'], ascending=True)
         df['Date'] = pd.to_datetime(df['Date'])
         df.reset_index(drop=True, inplace=True)
         return df
@@ -176,7 +188,7 @@ class Solde:
                 if load_csv_df is not None:
                     load_csv_df = load_csv_df[list(COLS.keys())]
                     load_csv_df = self.setup_columns(load_csv_df)
-                    poidspression.show_df(load_csv_df, title=file_name, max_rows=10)
+                    poidspression.show_df(load_csv_df, title=f'load_csv: {file_name}', max_rows=10)
                     log.info(f'Loaded file: {file_name}, with {len(load_csv_df)} rows')
                     return load_csv_df
                 else:
@@ -192,7 +204,7 @@ class Solde:
             log.error(traceback.format_exc())
             raise ex
 
-    def get_df_dl(self) -> dict[str, DataFrame]:
+    def get_df_from_dl(self) -> dict[str, DataFrame]:
         try:
             dicto: dict[str, DataFrame] = {}
             for path in Path(DL_PATH).glob(DL_FILE_PATTERN):
@@ -210,10 +222,8 @@ class Solde:
     def drop_duplicates(self, df):
         try:
             len1: int = len(df)
-            diff_df = df[df.duplicated(keep='first')]
-            log.info(f"Removed Rows: {len(diff_df)}")
             df.drop_duplicates(subset=list(COLS.keys()), keep='first', inplace=True)
-            log.info(f'drop_duplicates: removed {len1 - len(df)} rows from {len1}')
+            log.info(f'Initial df size: {len1}, removed: {len1 - len(df)} rows, now: {len(df)}')
         except Exception as ex:
             log.error(ex)
             log.error(traceback.format_exc())
@@ -223,28 +233,28 @@ class Solde:
         try:
             df: DataFrame = self.load_csv()
             if df is not None:
-                df_dict: dict[str, DataFrame] = self.get_df_dl()
+                df_dict: dict[str, DataFrame] = self.get_df_from_dl()
                 for path, df_tmp in df_dict.items():
                     df = pd.concat([df_tmp, df], axis=0, ignore_index=True, join='outer')
-                    log.info(f'\t\tConcated: {path}, now {len(df)} rows')
+                    log.info(f'Concated: {path}, now {len(df)} rows')
 
                 self.drop_duplicates(df)
                 df = self.setup_columns(df)
+                df = df.sort_values(by=['Date'], ascending=True)
+                df.reset_index(drop=True, inplace=True)
+                poidspression.show_df(df, title='Result:', max_rows=10)
 
-                poidspression.show_df(df, title='Result *********', max_rows=10)
-
-                out_file: str = BKP_PATH + BKP_FILE + EXTENSION
-                df.to_csv(out_file, encoding='utf-8', index=True, float_format='%.2f', date_format="%Y-%m-%d")
-                df.to_csv(out_file + '.zip', index=True, float_format='%.2f', date_format="%Y-%m-%d",
+                df.to_csv(BKP_FULL_PATH, encoding='utf-8', index=True, float_format='%.2f', date_format="%Y-%m-%d")
+                df.to_csv(BKP_FULL_PATH + '.zip', index=True, float_format='%.2f', date_format="%Y-%m-%d",
                           compression={
                               'method': 'zip',
                               'compression': zipfile.ZIP_LZMA,
                               'compresslevel': 9
                           })
-                log.info(f'Saved {out_file} file')
+                log.info(f'Saved {BKP_FULL_PATH} & zip files')
 
                 for path in df_dict.keys():
-                    log.info(f'\t\tFile {path} deleted')
+                    log.info(f'File {path} deleted')
                     Path(path).unlink(missing_ok=True)
             else:
                 log.error('df is None')

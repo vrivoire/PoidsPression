@@ -17,7 +17,7 @@ from matplotlib.dates import date2num, num2date
 from matplotlib.widgets import Slider, Button
 
 import poidspression
-from poidspression import log, POIDS_PRESSION_PATH, POIDS_PRESSION_FOLDER, DOCUMENTS_FOLDER
+from poidspression import log, POIDS_PRESSION_PATH, POIDS_PRESSION_FOLDER, DOCUMENTS_FOLDER, DAYS
 
 POIDS_CSV_FILE = 'poids.csv'
 
@@ -29,7 +29,6 @@ GOOGLE_FILE = "Renpho Health-R_PmJP0"
 # JSON_FILE = "derived_com.google.weight_com.google.android.g.json"
 # ZIP_FILE = "takeout-*.zip"
 
-DAYS = 30.437 * 3
 LOCATION = f'{os.getenv('USERPROFILE')}/{DOCUMENTS_FOLDER}/NetBeansProjects/PycharmProjects/PoidsPression/'
 
 

@@ -10,6 +10,8 @@ import pandas
 from matplotlib import pyplot as plt
 from pandas import DataFrame
 
+DAYS = 30.437 * 3
+
 POIDS_PRESSION_FOLDER = 'PoidsPression'
 DOCUMENTS_FOLDER = 'Documents'
 BKP_SCRIPTS_FOLDER = 'BkpScripts'
@@ -31,16 +33,13 @@ def ppretty(value: object, tab_char: object = '\t', return_char: object = '\n', 
 def set_icon(icon_name: str):
     path1: str = f'{Path(__file__).parent.parent.resolve()}/{icon_name}'
     if os.path.isfile(path1):
-        log.info(f'Setting window icon, {path1} icon exists')
         plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path1))
     else:
-        log.info(f'Not setting window icon, {path1} icon not exists')
         path2: str = f'{Path(__file__).parent.parent.parent.parent.parent.resolve()}/{icon_name}'
         if os.path.isfile(path2):
-            log.info(f'Setting window icon, {path2} icon exists')
             plt.get_current_fig_manager().window.iconphoto(False, tk.PhotoImage(file=path2))
         else:
-            log.info(f'Not setting window icon, {path2} icon not exists')
+            log.info(f'Not setting window icon, {path1} & {path2} icon not exists')
 
 
 def set_up(log_name: str):
@@ -68,4 +67,4 @@ def show_df(df: DataFrame, title='', max_columns=None, width=1000, max_rows=50) 
     pandas.set_option('display.max_columns', max_columns)
     pandas.set_option('display.width', width)
     pandas.set_option('display.max_rows', max_rows)
-    log.info(f'>>>> {title} DataFrame len: {len(df)}\n{df[len(df) - max_rows:]}')
+    log.info(f'>>>> {title} DataFrame: {len(df)} rows\n{df[len(df) - max_rows:]}')
