@@ -2,7 +2,6 @@
 # https://takeout.google.com/
 
 import os.path
-import tkinter
 from datetime import datetime, timedelta
 
 import matplotlib
@@ -168,16 +167,7 @@ def display_graph():
     button = Button(fig.add_axes((0.9, 0.01, 0.055, 0.03)), 'Reset', hovercolor='0.975')
     button.on_clicked(callback_reset)
 
-    mng = plt.get_current_fig_manager()
-    mng.window.state('zoomed')
-
-    dpi: float = fig.get_dpi()
-    root = tkinter.Tk()
-    screen_width: int = root.winfo_screenwidth()
-    screen_height: int = root.winfo_screenheight()
-    root.destroy()
-    fig.set_size_inches(screen_width / float(dpi), screen_height / float(dpi))
-    plt.savefig(POIDS_PRESSION_PATH + 'Poids.png')
+    poidspression.save_window(fig, 'Poids.png')
 
     poidspression.set_icon('poids.png')
 

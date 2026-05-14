@@ -2,6 +2,7 @@ import json
 import logging as log
 import logging.handlers
 import os.path
+import tkinter
 import tkinter as tk
 import traceback
 import zipfile
@@ -10,6 +11,8 @@ from pathlib import Path
 import pandas
 import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.figure import Figure
 from pandas import DataFrame
 
 DAYS = 30.437 * 3
@@ -74,6 +77,19 @@ def ppretty(value: object, tab_char: object = '\t', return_char: object = '\n', 
         log.error(ex)
         log.error(traceback.format_exc())
     return None
+
+
+def save_window(fig: Figure, image_name: str) -> None:
+    mng: FigureManagerBase = plt.get_current_fig_manager()
+    mng.window.state('zoomed')
+
+    dpi: float = fig.get_dpi()
+    root = tkinter.Tk()
+    screen_width: int = root.winfo_screenwidth()
+    screen_height: int = root.winfo_screenheight()
+    root.destroy()
+    fig.set_size_inches(screen_width / float(dpi), screen_height / float(dpi))
+    plt.savefig(POIDS_PRESSION_PATH + image_name)
 
 
 def set_icon(icon_name: str):

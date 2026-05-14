@@ -1,5 +1,4 @@
 import os
-import tkinter
 import traceback
 from pathlib import Path
 
@@ -154,16 +153,7 @@ class Solde:
 
             slider_position.set_val(date2num(df['Date'][len(df['Date']) - 1]))
 
-            mng = plt.get_current_fig_manager()
-            mng.window.state('zoomed')
-
-            dpi: float = fig.get_dpi()
-            root = tkinter.Tk()
-            SCREEN_WIDTH: int = root.winfo_screenwidth()
-            SCREEN_HEIGHT: int = root.winfo_screenheight()
-            root.destroy()
-            fig.set_size_inches(SCREEN_WIDTH / float(dpi), SCREEN_HEIGHT / float(dpi))
-            plt.savefig(POIDS_PRESSION_PATH + 'Poids.png')
+            poidspression.save_window(fig, 'Solde.png')
 
             poidspression.set_icon('dollar_coin.png')
 
